@@ -26,5 +26,6 @@
   "description": "Online szolgálati naptár React + Express + PostgreSQL – Vercel + Neon",
   "engines": {
     "node": ">=20"
-  }
+  },
+  "type": "module"
 }
