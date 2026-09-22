@@ -1,0 +1,26 @@
+RENDER TELEPÍTÉS – SZOLGÁLAT NAPTÁR
+
+1. Töltsd fel a projektet GitHub repositoryba.
+2. Render -> New -> Web Service.
+3. Runtime: Node.
+4. Build Command:
+   npm install && npm run build
+5. Start Command:
+   npm start
+6. Hozz létre Render PostgreSQL adatbázist.
+7. A Web Service Environment részében:
+   DATABASE_URL = PostgreSQL Internal Database URL
+8. A JWT_SECRET legyen hosszú, véletlenszerű titok.
+   render.yaml használatakor ezt Render automatikusan generálhatja.
+
+FONTOS:
+Ne Static Site-ként telepítsd, mert az alkalmazás Express API-t is futtat.
+
+A szerver induláskor automatikusan létrehozza a szükséges PostgreSQL táblákat.
+
+Health check:
+https://A-RENDER-URL-ed/health
+
+Telefon:
+- iPhone Safari -> Megosztás -> Főképernyőhöz adás
+- Android Chrome -> Menü -> Telepítés / Hozzáadás a kezdőképernyőhöz

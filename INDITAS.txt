@@ -1,0 +1,11 @@
+FRISSÍTETT VERZIÓ
+
+A kinézet teljesen új, modernebb dashboard stílusú.
+A „Szolgálat hozzáadása” fehér oldal hibáját javítottam: az űrlap most modal/overlay ablakban jelenik meg, és a Mentés, Mégse, Szerkesztés és Törlés működik.
+
+Indítás Windows alatt:
+1. Node.js LTS telepítése
+2. PowerShell a projekt mappájában
+3. npm install
+4. npm run dev
+5. A kiírt localhost cím megnyitása

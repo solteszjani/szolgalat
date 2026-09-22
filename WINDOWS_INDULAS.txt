@@ -1,0 +1,22 @@
+SZOLGÁLAT NAPTÁR – WINDOWS
+
+1. Telepíts Node.js LTS-t: https://nodejs.org/
+2. Nyiss PowerShellt a projekt mappájában.
+3. Futtasd:
+   npm install
+   npm run dev
+4. A terminálban kapott localhost címet nyisd meg böngészőben.
+
+Production build:
+   npm run build
+   npm run preview
+
+Az alkalmazás PWA-ként böngészőből telepíthető. iPhone-ra App Store-os natív csomagoláshoz
+a Capacitor iOS projekt létrehozása után macOS + Xcode szükséges.
+
+Androidhoz Windowsról is készíthető Capacitor projekt:
+   npm install @capacitor/core @capacitor/cli @capacitor/android
+   npx cap add android
+   npm run build
+   npx cap sync
+   npx cap open android

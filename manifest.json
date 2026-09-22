@@ -1,0 +1,11 @@
+{
+  "name": "Szolgálat Naptár",
+  "short_name": "Szolgálat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#2563eb",
+  "lang": "hu",
+  "orientation": "portrait",
+  "scope": "/"
+}
