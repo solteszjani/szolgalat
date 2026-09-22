@@ -48,6 +48,19 @@ function ensureDb(req,res,next){
 
 function tokenFor(user){return jwt.sign({id:user.id,email:user.email},JWT_SECRET,{expiresIn:"30d"});}
 app.use("/api",ensureDb);
+
+// Vercel/Neon setup and diagnostics endpoint. It creates the tables and reports
+// connection status without exposing the database URL or credentials.
+app.get("/api/setup", async (req,res)=>{
+  try{
+    await pool.query("SELECT 1");
+    const tables=await pool.query(`SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('users','shifts') ORDER BY table_name`);
+    res.json({ok:true,database:true,tables:tables.rows.map(r=>r.table_name),message:"Az adatbázis elérhető és az alkalmazás táblái inicializálva vannak."});
+  }catch(e){
+    console.error("/api/setup error:",e);
+    res.status(500).json({ok:false,database:false,error:String(e.message||e)});
+  }
+});
 function auth(req,res,next){
  try{
    const h=req.headers.authorization||"";
