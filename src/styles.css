@@ -325,3 +325,25 @@
  .tabloDetailGrid>div.full{grid-column:auto}
  .tabloDetailTop h2{font-size:21px}
 }
+
+/* Tabló fejlesztések: dátumugrás, szűrés, éjszakai jelzés */
+.tabloToolbar{flex-wrap:wrap}
+.tabloToolbar .searchBox{flex:1 1 360px}
+.tabloFilter,.dateJump{height:38px;border:1px solid #dbe3ec;background:#fff;border-radius:10px;color:#475569;font-weight:700}
+.tabloFilter{padding:0 11px;min-width:155px}
+.dateJump{display:flex;align-items:center;gap:7px;padding:0 9px}
+.dateJump svg{width:16px;color:#3b82f6}
+.dateJump input{border:0;background:transparent;color:inherit;font:inherit;font-size:12px;outline:none;min-width:128px}
+.dark .tabloFilter,.dark .dateJump{background:#101b2b;border-color:#2a3b53;color:#dbe7f4}
+.dark .dateJump input{color:#dbe7f4}
+.nightIcon{width:12px!important;height:12px!important;min-width:12px;color:#fff;opacity:.9;margin-left:5px}
+.legendMoon{width:12px;height:12px;color:#94a3b8}
+.rosterShift.overnight{outline:2px solid rgba(255,255,255,.18);box-shadow:0 0 0 1px rgba(6,182,212,.18),0 6px 15px rgba(6,182,212,.2)}
+@media(max-width:850px){
+ .tabloToolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .tabloToolbar .searchBox{grid-column:1/-1;width:100%}
+ .tabloFilter,.dateJump{width:100%;min-width:0}
+ .dateJump input{min-width:0;width:100%}
+ .tabloNavDates{grid-column:1/-1;margin-top:0}
+ .tabloNavDates button{flex:1}
+}
