@@ -3,9 +3,23 @@
   "short_name": "Szolgálat",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f6fa",
+  "background_color": "#08111f",
   "theme_color": "#2563eb",
   "lang": "hu",
   "orientation": "portrait",
-  "scope": "/"
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
