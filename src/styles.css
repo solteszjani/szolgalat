@@ -261,3 +261,24 @@
   .days button { height: 45px; }
   .days button b { font-size: 11px; }
 }
+
+/* Tabló */
+.tabloPage{max-width:1100px}
+.tabloHero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px}
+.tabloHero h1{font-size:48px;line-height:1;margin:8px 0 10px;letter-spacing:-.05em}
+.tabloHero p{margin:0;color:#718096;font-size:14px}
+.tabloCount{min-width:130px;padding:16px 18px;border-radius:20px;background:#111827;color:#fff;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}
+.tabloCount svg{grid-row:1/3;color:#60a5fa}.tabloCount strong{font-size:23px}.tabloCount span{font-size:10px;color:#94a3b8}
+.tabloToolbar{padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.searchBox{flex:1;display:flex;align-items:center;gap:9px;background:#f8fafc;border:1px solid #dbe3ec;border-radius:13px;padding:0 12px}
+.dark .searchBox{background:#0d1726;border-color:#2a3b53}
+.searchBox svg{width:17px;color:#94a3b8}.searchBox input{border:0;outline:0;background:transparent;color:inherit;width:100%;height:40px;font-size:12px}.tabloToolbar>span{font-size:11px;color:#718096;font-weight:700;white-space:nowrap}
+.tabloList{display:flex;flex-direction:column;gap:12px}.tabloDay{overflow:hidden}.tabloDayHead{padding:15px 18px;border-bottom:1px solid #e6ebf1}.dark .tabloDayHead{border-color:#24344a}.tabloDayHead b{display:block;font-size:15px;text-transform:capitalize}.tabloDayHead small{color:#718096;font-size:10px;margin-top:3px;display:block}
+.tabloRow{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:13px 18px;border-bottom:1px solid #edf1f5}.tabloRow:last-child{border-bottom:0}.dark .tabloRow{border-color:#1f3045}
+.tabloPerson{display:flex;align-items:center;gap:10px;min-width:0}.personAvatar{width:34px;height:34px;border-radius:11px;background:#eaf1ff;color:#2563eb;display:grid;place-items:center;font-weight:900;font-size:12px}.dark .personAvatar{background:#172d4a}.tabloPerson strong,.tabloPerson small{display:block}.tabloPerson strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px}.tabloPerson small{font-size:10px;color:#718096;margin-top:2px}
+.tabloShift{display:flex;align-items:center;gap:12px;white-space:nowrap}.tabloShift>b{font-size:13px}.tabloBadge{font-size:9px;font-weight:800;padding:5px 8px;border-radius:7px}
+.tabloEmpty{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#718096;text-align:center}.tabloEmpty svg{width:40px;color:#94a3b8}.tabloEmpty b{color:inherit;font-size:14px}.tabloEmpty span{font-size:11px}.tabloNotice{text-align:center;color:#94a3b8;font-size:10px;margin-top:13px}
+@media(max-width:700px){
+ .tabloPage{padding:18px 12px 20px}.tabloHero{align-items:stretch;flex-direction:column;margin-bottom:14px}.tabloHero h1{font-size:35px}.tabloHero p{font-size:11px;line-height:1.45}.tabloCount{min-width:0;width:100%;grid-template-columns:auto 1fr; padding:12px 15px}.tabloToolbar{padding:9px;display:block}.searchBox{width:100%}.tabloToolbar>span{display:block;margin:7px 3px 1px}.tabloDayHead{padding:12px 13px}.tabloRow{padding:11px 12px;display:block}.tabloPerson{margin-bottom:9px}.tabloPerson strong{max-width:calc(100vw - 90px)}.tabloShift{justify-content:space-between}.tabloShift>b{font-size:12px}
+ .tabloNav{display:none}
+}

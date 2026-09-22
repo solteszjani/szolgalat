@@ -41,6 +41,8 @@ export async function ensureDb() {
         );
         CREATE INDEX IF NOT EXISTS shifts_user_date_idx ON shifts(user_id,date);
       `);
+      // A 90 napnál régebbi szolgálatok automatikus törlése.
+      await db.query(`DELETE FROM shifts WHERE date < CURRENT_DATE - INTERVAL '90 days'`);
       return true;
     })().catch(err => {
       initPromise = undefined;
