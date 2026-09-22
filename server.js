@@ -16,10 +16,9 @@ app.use(express.json());
 
 app.get("/health",(req,res)=>res.json({ok:true,service:"szolgalat-naptar"}));
 
+let dbInitPromise=null;
 async function init(){
- if(!process.env.DATABASE_URL){
-   throw new Error("DATABASE_URL nincs beállítva. Vercel/Neon PostgreSQL kapcsolat szükséges.");
- }
+ if(!process.env.DATABASE_URL) throw new Error("DATABASE_URL nincs beállítva. Vercel/Neon PostgreSQL kapcsolat szükséges.");
  await pool.query(`
  CREATE TABLE IF NOT EXISTS users(
    id SERIAL PRIMARY KEY,
@@ -42,8 +41,13 @@ async function init(){
  CREATE INDEX IF NOT EXISTS shifts_user_date_idx ON shifts(user_id,date);
  `);
 }
+function ensureDb(req,res,next){
+ if(!dbInitPromise) dbInitPromise=init().catch(err=>{dbInitPromise=null; throw err;});
+ dbInitPromise.then(()=>next()).catch(err=>{console.error("Database init error:",err);res.status(500).json({error:"Az adatbázis nem érhető el vagy még nincs inicializálva."});});
+}
 
 function tokenFor(user){return jwt.sign({id:user.id,email:user.email},JWT_SECRET,{expiresIn:"30d"});}
+app.use("/api",ensureDb);
 function auth(req,res,next){
  try{
    const h=req.headers.authorization||"";
@@ -116,10 +120,8 @@ app.get("*",(req,res)=>{
  res.sendFile(path.join(dist,"index.html"));
 });
 
-if(process.env.VERCEL){
-  init().catch(e=>console.error("Database init error:",e));
-}else{
+if(!process.env.VERCEL){
   init().then(()=>app.listen(PORT,()=>console.log("Server listening on "+PORT))).catch(e=>{console.error(e);process.exit(1)});
 }
 
-module.exports = app;;
+module.exports = app;
