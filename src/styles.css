@@ -292,7 +292,7 @@
 .rosterTop,.rosterRow{grid-template-columns:190px 1fr}
 .rosterDays{grid-template-columns:repeat(10,minmax(92px,1fr))}
 .rosterTimeline{grid-template-columns:repeat(10,minmax(92px,1fr));min-width:920px}
-.rosterShift{min-width:86px;justify-content:center;padding:0 7px;cursor:pointer;border:0;font:inherit}
+.rosterShift{justify-content:center;padding:0 7px;cursor:pointer;border:0;font:inherit;min-width:0;overflow:visible}
 .rosterShift span{overflow:visible;text-overflow:clip;white-space:nowrap;font-size:10px}
 .rosterShift.otherShift{background:linear-gradient(135deg,#0f8f88,#06b6d4)}
 .rosterCell{min-width:92px}
@@ -317,7 +317,7 @@
  .rosterDays{grid-template-columns:repeat(10,minmax(96px,1fr))}
  .rosterTimeline{grid-template-columns:repeat(10,minmax(96px,1fr));min-width:960px}
  .rosterCell{min-width:96px}
- .rosterShift{min-width:90px}
+ .rosterShift{min-width:0}
  .rosterShift span{font-size:10px}
  .roster{overflow-x:auto;-webkit-overflow-scrolling:touch}
  .tabloDetail{width:calc(100vw - 24px);max-height:85dvh;overflow:auto;padding:18px}
