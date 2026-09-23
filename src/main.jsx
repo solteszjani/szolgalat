@@ -100,6 +100,8 @@ function App(){
 
 function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
   const[data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[search,setSearch]=useState(""),[typeFilter,setTypeFilter]=useState("Mind"),[selectedDate,setSelectedDate]=useState(new Date()),[selectedShift,setSelectedShift]=useState(null),[viewMode,setViewMode]=useState("10");
+  const[cfg,setCfg]=useState({service_types:TYPES,call_signs:CALLSIGNS});
+  useEffect(()=>{api("/api/settings").then(setCfg).catch(()=>{})},[]);
   const loadTablo=()=>{setLoading(true);api("/api/tablo").then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false))};
   useEffect(()=>{loadTablo()},[]);
   const days=useMemo(()=>{const base=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate());return Array.from({length:10},(_,i)=>new Date(base.getFullYear(),base.getMonth(),base.getDate()+i))},[selectedDate]);
