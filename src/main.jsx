@@ -6,7 +6,15 @@ import"./styles.css";
 import{registerServiceWorker}from"./registerSW.js";
 const TYPES=["Járőr szolgálat","Egyéb","Blaha Poszt","Pápa tér poszt"],ENTRY_TYPES=["Szolgálat","Szabadság","Túlóra"],CALLSIGNS=["Józsefváros-121","Józsefváros-122","Józsefváros-123","Józsefváros-321","Józsefváros-322","Józsefváros-491","Józsefváros-141"],COLORS={"Járőr szolgálat":"#3b82f6","Egyéb":"#06b6d4","Blaha Poszt":"#8b5cf6","Pápa tér poszt":"#f59e0b"},pad=n=>String(n).padStart(2,"0"),iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,dateKey=v=>{if(v instanceof Date)return Number.isNaN(v.getTime())?"":iso(v);const s=String(v??"");const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:""},fromISO=s=>{const k=dateKey(s);if(!k)return new Date(NaN);let[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)},mins=t=>{if(typeof t!=="string"||!/^[0-9]{1,2}:[0-9]{2}$/.test(t))return NaN;let[h,m]=t.split(":").map(Number);return h*60+m},duration=(a,b)=>{let n=mins(b)-mins(a);if(n<0)n+=1440;return n/60};
 
-async function api(url,opt={}){let token=localStorage.getItem("sz_token");let r=await fetch(url,{...opt,headers:{"Content-Type":"application/json",...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{})}});let data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||"Hiba történt");return data}
+async function api(url,opt={}){
+  let token=localStorage.getItem("sz_token");
+  const isGet=!opt.method||String(opt.method).toUpperCase()==="GET";
+  const finalUrl=isGet?(url+(url.includes("?")?"&":"?")+ "_ts="+Date.now()):url;
+  let r=await fetch(finalUrl,{...opt,cache:isGet?"no-store":opt.cache,headers:{"Content-Type":"application/json","Cache-Control":"no-cache",...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{})}});
+  let data=await r.json().catch(()=>({}));
+  if(!r.ok)throw Error(data.error||"Hiba történt");
+  return data
+}
 function Auth({onAuth}){const[register,setRegister]=useState(false),[username,setUsername]=useState(""),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");const go=async e=>{e.preventDefault();setError("");setBusy(true);try{let d=await api(register?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify({username,email,password})});localStorage.setItem("sz_token",d.token);onAuth(d.user)}catch(e){setError(e.message)}finally{setBusy(false)}};return <div className="auth"><div className="authCard"><div className="authLogo"><CalendarDays/></div><h1>Szolgálat<br/><em>Naptár</em></h1><p>A szolgálatvezénylésed biztonságosan, online.</p><form onSubmit={go}><label>Felhasználónév<input type="text" value={username} onChange={e=>setUsername(e.target.value)} required minLength="3" maxLength="30" autoCapitalize="none" autoCorrect="off" placeholder="pl. kovacs.janos"/></label><label>{register?"E-mail cím (opcionális)":"Felhasználónév vagy e-mail"}{register&&<input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoCapitalize="none" autoCorrect="off" placeholder="pl. nev@example.com"/>}</label><label>Jelszó<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength="6" required placeholder="Legalább 6 karakter"/></label>{error&&<div className="error">{error}</div>}<button className="primary authBtn" disabled={busy}>{busy?"Feldolgozás…":register?"Fiók létrehozása":"Bejelentkezés"}</button></form><button className="linkBtn" onClick={()=>setRegister(!register)}>{register?"Már van fiókom":"Még nincs fiókom → Regisztráció"}</button><small className="privacy"><Cloud size={13}/> A szolgálatok online adatbázisban tárolódnak.</small></div></div>}
 
 
@@ -36,6 +44,24 @@ function App(){
     if(!token){setLoading(false);return;}
     api("/api/me").then(u=>{setUser(u);return load();}).catch(()=>{localStorage.removeItem("sz_token");setUser(null)}).finally(()=>setLoading(false));
   },[]);
+
+  // Valós idejű frissítés: nem kell F5. Másik eszközről történt módosítás is
+  // legfeljebb néhány másodpercen belül megjelenik, fókuszba visszatérve pedig azonnal.
+  useEffect(()=>{
+    if(!user)return;
+    let busy=false;
+    const refresh=async()=>{
+      if(busy || document.hidden)return;
+      busy=true;
+      try{await load();}finally{busy=false;}
+    };
+    const timer=setInterval(refresh,3000);
+    const onFocus=()=>refresh();
+    const onVisible=()=>{if(!document.hidden)refresh()};
+    window.addEventListener("focus",onFocus);
+    document.addEventListener("visibilitychange",onVisible);
+    return()=>{clearInterval(timer);window.removeEventListener("focus",onFocus);document.removeEventListener("visibilitychange",onVisible)};
+  },[user]);
 
   useEffect(()=>{document.documentElement.classList.toggle("dark-mode",dark)},[dark]);
 
@@ -110,7 +136,21 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
   const[cfg,setCfg]=useState({service_types:TYPES,call_signs:CALLSIGNS});
   useEffect(()=>{api("/api/settings").then(setCfg).catch(()=>{})},[]);
   const loadTablo=()=>{setLoading(true);setError("");api("/api/tablo").then(d=>setData(Array.isArray(d)?d:[])).catch(e=>{setData([]);setError(e.message||"A Tabló adatai nem tölthetők be.")}).finally(()=>setLoading(false))};
-  useEffect(()=>{loadTablo()},[]);
+  useEffect(()=>{
+    loadTablo();
+    let busy=false;
+    const refresh=async()=>{
+      if(busy || document.hidden)return;
+      busy=true;
+      try{await loadTablo();}finally{busy=false;}
+    };
+    const timer=setInterval(refresh,3000);
+    const onFocus=()=>refresh();
+    const onVisible=()=>{if(!document.hidden)refresh()};
+    window.addEventListener("focus",onFocus);
+    document.addEventListener("visibilitychange",onVisible);
+    return()=>{clearInterval(timer);window.removeEventListener("focus",onFocus);document.removeEventListener("visibilitychange",onVisible)};
+  },[]);
   const days=useMemo(()=>{const base=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate());return Array.from({length:10},(_,i)=>new Date(base.getFullYear(),base.getMonth(),base.getDate()+i))},[selectedDate]);
   const filtered=(Array.isArray(data)?data:[]).filter(x=>{const q=search.trim().toLowerCase();const ms=!q||[x.username,x.call_sign,x.type,x.kind,x.location,x.note,x.date,x.start,x.end].map(v=>v??"").join(" ").toLowerCase().includes(q);const mt=typeFilter==="Mind"||x.type===typeFilter;return ms&&mt});
   const users=useMemo(()=>{const m=new Map();filtered.forEach(x=>{if(!m.has(x.user_id))m.set(x.user_id,x.username)});return [...m.entries()]},[filtered]);
