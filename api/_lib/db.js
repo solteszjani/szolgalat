@@ -48,8 +48,21 @@ export async function ensureDb(){
         UPDATE shifts SET type='Járőr szolgálat' WHERE type='Járőrszolgálat';
         CREATE INDEX IF NOT EXISTS shifts_user_date_idx ON shifts(user_id,date);
         CREATE INDEX IF NOT EXISTS shifts_call_sign_date_idx ON shifts(call_sign,date);
+        CREATE TABLE IF NOT EXISTS system_settings(
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        INSERT INTO system_settings(key,value) VALUES
+          ('app_name','Szolgálat Naptár'),
+          ('retention_days','90'),
+          ('service_types','Járőr szolgálat|Egyéb|Blaha Poszt|Pápa tér poszt'),
+          ('call_signs','Józsefváros-121|Józsefváros-122|Józsefváros-123|Józsefváros-321|Józsefváros-322|Józsefváros-491|Józsefváros-141')
+        ON CONFLICT (key) DO NOTHING;
       `);
-      await db.query(`DELETE FROM shifts WHERE date < CURRENT_DATE - INTERVAL '90 days'`);
+      const retention=await db.query("SELECT value FROM system_settings WHERE key='retention_days'");
+      const days=Math.max(1,Math.min(3650,parseInt(retention.rows[0]?.value||'90',10)||90));
+      await db.query(`DELETE FROM shifts WHERE date < CURRENT_DATE - ($1 * INTERVAL '1 day')`,[days]);
       return true;
     })().catch(err=>{initPromise=undefined;throw err});
   }
