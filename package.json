@@ -27,5 +27,8 @@
   "engines": {
     "node": ">=20"
   },
-  "type": "module"
+  "type": "module",
+  "allowScripts": {
+    "esbuild": true
+  }
 }
