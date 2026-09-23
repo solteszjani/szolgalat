@@ -7,7 +7,7 @@ import{registerServiceWorker}from"./registerSW.js";
 const TYPES=["Járőr szolgálat","Egyéb","Blaha Poszt","Pápa tér poszt"],ENTRY_TYPES=["Szolgálat","Szabadság","Túlóra"],CALLSIGNS=["Józsefváros-121","Józsefváros-122","Józsefváros-123","Józsefváros-321","Józsefváros-322","Józsefváros-491","Józsefváros-141"],COLORS={"Járőr szolgálat":"#3b82f6","Egyéb":"#06b6d4","Blaha Poszt":"#8b5cf6","Pápa tér poszt":"#f59e0b"},pad=n=>String(n).padStart(2,"0"),iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,dateKey=v=>{if(v instanceof Date)return Number.isNaN(v.getTime())?"":iso(v);const s=String(v??"");const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:""},fromISO=s=>{const k=dateKey(s);if(!k)return new Date(NaN);let[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)},mins=t=>{let[h,m]=t.split(":").map(Number);return h*60+m},duration=(a,b)=>{let n=mins(b)-mins(a);if(n<0)n+=1440;return n/60};
 
 async function api(url,opt={}){let token=localStorage.getItem("sz_token");let r=await fetch(url,{...opt,headers:{"Content-Type":"application/json",...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{})}});let data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||"Hiba történt");return data}
-function Auth({onAuth}){const[register,setRegister]=useState(false),[username,setUsername]=useState(""),[password,setPassword]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");const go=async e=>{e.preventDefault();setError("");setBusy(true);try{let d=await api(register?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify({username,password})});localStorage.setItem("sz_token",d.token);onAuth(d.user)}catch(e){setError(e.message)}finally{setBusy(false)}};return <div className="auth"><div className="authCard"><div className="authLogo"><CalendarDays/></div><h1>Szolgálat<br/><em>Naptár</em></h1><p>A szolgálatvezénylésed biztonságosan, online.</p><form onSubmit={go}><label>Felhasználónév<input type="text" value={username} onChange={e=>setUsername(e.target.value)} required minLength="3" maxLength="30" autoCapitalize="none" autoCorrect="off" placeholder="pl. kovacs.janos"/></label><label>Jelszó<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength="6" required placeholder="Legalább 6 karakter"/></label>{error&&<div className="error">{error}</div>}<button className="primary authBtn" disabled={busy}>{busy?"Feldolgozás…":register?"Fiók létrehozása":"Bejelentkezés"}</button></form><button className="linkBtn" onClick={()=>setRegister(!register)}>{register?"Már van fiókom":"Még nincs fiókom → Regisztráció"}</button><small className="privacy"><Cloud size={13}/> A szolgálatok online adatbázisban tárolódnak.</small></div></div>}
+function Auth({onAuth}){const[register,setRegister]=useState(false),[username,setUsername]=useState(""),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");const go=async e=>{e.preventDefault();setError("");setBusy(true);try{let d=await api(register?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify({username,email,password})});localStorage.setItem("sz_token",d.token);onAuth(d.user)}catch(e){setError(e.message)}finally{setBusy(false)}};return <div className="auth"><div className="authCard"><div className="authLogo"><CalendarDays/></div><h1>Szolgálat<br/><em>Naptár</em></h1><p>A szolgálatvezénylésed biztonságosan, online.</p><form onSubmit={go}><label>Felhasználónév<input type="text" value={username} onChange={e=>setUsername(e.target.value)} required minLength="3" maxLength="30" autoCapitalize="none" autoCorrect="off" placeholder="pl. kovacs.janos"/></label><label>{register?"E-mail cím (opcionális)":"Felhasználónév vagy e-mail"}{register&&<input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoCapitalize="none" autoCorrect="off" placeholder="pl. nev@example.com"/>}</label><label>Jelszó<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength="6" required placeholder="Legalább 6 karakter"/></label>{error&&<div className="error">{error}</div>}<button className="primary authBtn" disabled={busy}>{busy?"Feldolgozás…":register?"Fiók létrehozása":"Bejelentkezés"}</button></form><button className="linkBtn" onClick={()=>setRegister(!register)}>{register?"Már van fiókom":"Még nincs fiókom → Regisztráció"}</button><small className="privacy"><Cloud size={13}/> A szolgálatok online adatbázisban tárolódnak.</small></div></div>}
 
 
 function App(){
@@ -61,7 +61,9 @@ function App(){
   if(loading)return <div className={dark?"app dark":"app"}><div className="loadingScreen"><CalendarDays/><span>Betöltés…</span></div></div>;
   if(!user)return <Auth onAuth={u=>{setUser(u);load()}}/>;
 
-  if(page==="tablo")return <div className={dark?"app dark":"app"}><Tablo dark={dark} onBack={()=>setPage("home")} onToggleDark={()=>{setDark(v=>{localStorage.setItem("szolgalat-dark",v?"0":"1");return !v})}} onLogout={logout}/></div>;
+  if(page==="tablo")return <div className={dark?"app dark":"app"}><Tablo dark={dark} onBack={()=>setPage("home")} onToggleDark={()=>{setDark(v=>{localStorage.setItem("szolgalat-dark",v?"0":"1");return !v})}} onLogout={logout} onStats={()=>setPage("stats")} onAdmin={()=>setPage("admin")} isAdmin={Boolean(user.is_admin)}/></div>;
+  if(page==="stats")return <div className={dark?"app dark":"app"}><StatsPage shifts={shifts} user={user} dark={dark} onBack={()=>setPage("home")} onToggleDark={()=>{setDark(v=>{localStorage.setItem("szolgalat-dark",v?"0":"1");return !v})}} onLogout={logout}/></div>;
+  if(page==="admin")return <div className={dark?"app dark":"app"}><AdminPage dark={dark} onBack={()=>setPage("home")} onToggleDark={()=>{setDark(v=>{localStorage.setItem("szolgalat-dark",v?"0":"1");return !v})}} onLogout={logout}/></div>;
 
   return <div className={dark?"app dark":"app"}>
     <header className="nav">
@@ -70,7 +72,7 @@ function App(){
         <span className="sync">{syncing?<RefreshCw className="spin"/>:<Cloud/>}</span>
         <button className="round" onClick={()=>setDark(v=>{localStorage.setItem("szolgalat-dark",v?"0":"1");return !v})}>{dark?<Sun/>:<Moon/>}</button>
         <button className="round logout" onClick={logout}><LogOut/></button>
-        <button className="round tabloNav" title="Tabló" onClick={()=>setPage("tablo")}><Table2/></button>
+        <button className="round tabloNav" title="Tabló" onClick={()=>setPage("tablo")}><Table2/></button><button className="round" title="Statisztikák" onClick={()=>setPage("stats")}><Clock3/></button>{user.is_admin&&<button className="round" title="Adminisztráció" onClick={()=>setPage("admin")}><Users/></button> }
         <button className="primary" onClick={()=>setModal({mode:"new"})}><Plus/><span>Új szolgálat</span></button>
       </div>
     </header>
@@ -96,8 +98,8 @@ function App(){
 }
 
 
-function Tablo({dark,onBack,onToggleDark,onLogout}){
-  const[data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[search,setSearch]=useState(""),[typeFilter,setTypeFilter]=useState("Mind"),[selectedDate,setSelectedDate]=useState(new Date()),[selectedShift,setSelectedShift]=useState(null);
+function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
+  const[data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[search,setSearch]=useState(""),[typeFilter,setTypeFilter]=useState("Mind"),[selectedDate,setSelectedDate]=useState(new Date()),[selectedShift,setSelectedShift]=useState(null),[viewMode,setViewMode]=useState("10");
   const loadTablo=()=>{setLoading(true);api("/api/tablo").then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false))};
   useEffect(()=>{loadTablo()},[]);
   const days=useMemo(()=>{const base=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate());return Array.from({length:10},(_,i)=>new Date(base.getFullYear(),base.getMonth(),base.getDate()+i))},[selectedDate]);
@@ -143,7 +145,7 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
   return <div className="tabloPage">
     <header className="nav">
       <div className="brand"><div className="brandIcon"><Table2/></div><div><b>Szolgálat</b><span>Tabló</span></div></div>
-      <div className="navRight"><button className="round" onClick={onToggleDark}>{dark?<Sun/>:<Moon/>}</button><button className="round" onClick={onBack}><ArrowLeft/></button><button className="round logout" onClick={onLogout}><LogOut/></button></div>
+      <div className="navRight"><button className="round" onClick={onToggleDark}>{dark?<Sun/>:<Moon/>}</button><button className="round" title="Statisztikák" onClick={onStats}><Clock3/></button>{isAdmin&&<button className="round" title="Adminisztráció" onClick={onAdmin}><Users/></button>}<button className="round" onClick={onBack}><ArrowLeft/></button><button className="round logout" onClick={onLogout}><LogOut/></button></div>
     </header>
     <main>
       <section className="tabloHero"><div><div className="kicker">KÖZÖS SZOLGÁLATI TÁBLÓ</div><h1>Tabló</h1><p>Az állomány szolgálatai egy közös, 10 napos idősávban.</p></div><div className="tabloCount"><Users/><strong>{users.length}</strong><span>regisztrált tag</span></div></section>
@@ -151,23 +153,23 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
         <div className="searchBox"><Search/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Keresés név, hívónév vagy szolgálat alapján…"/></div>
         <select className="tabloFilter" value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}><option>Mind</option>{TYPES.map(t=><option key={t}>{t}</option>)}<option>Szabadság</option><option>Túlóra</option></select>
         <label className="dateJump"><CalendarDays/><input type="date" value={iso(selectedDate)} onChange={e=>{if(e.target.value)setSelectedDate(fromISO(e.target.value))}}/></label>
-        <div className="tabloNavDates"><button onClick={()=>setSelectedDate(d=>new Date(d.getFullYear(),d.getMonth(),d.getDate()-10))}><ChevronLeft/></button><button onClick={()=>setSelectedDate(new Date())}>Ma</button><button onClick={()=>setSelectedDate(d=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+10))}><ChevronRight/></button></div>
+        <div className="tabloNavDates"><button onClick={()=>setSelectedDate(d=>viewMode==="month"?new Date(d.getFullYear(),d.getMonth()-1,1):new Date(d.getFullYear(),d.getMonth(),d.getDate()-10))}><ChevronLeft/></button><button onClick={()=>setSelectedDate(new Date())}>Ma</button><button onClick={()=>setSelectedDate(d=>viewMode==="month"?new Date(d.getFullYear(),d.getMonth()+1,1):new Date(d.getFullYear(),d.getMonth(),d.getDate()+10))}><ChevronRight/></button></div><div className="viewToggle"><button className={viewMode==="10"?"active":""} onClick={()=>setViewMode("10")}>10 nap</button><button className={viewMode==="month"?"active":""} onClick={()=>setViewMode("month")}>Havi nézet</button></div>
       </div>
       {error&&<div className="error pageError">{error}</div>}
-      {loading?<div className="card tabloEmpty">Betöltés…</div>:<div className="card roster">
+      {loading?<div className="card tabloEmpty">Betöltés…</div>:viewMode==="10"?<div className="card roster">
         <div className="rosterTop"><div className="rosterNameHead">ÁLLOMÁNY</div><div className="rosterDays">{days.map((d,i)=><div key={i} className={iso(d)===iso(new Date())?"todayCol":""}><b>{fmtDay(d)}</b><span>{d.getDate()}</span></div>)}</div></div>
         {users.length?users.map(([uid,username])=>{
           const personShifts=filtered.filter(x=>String(x.user_id)===String(uid));
-          const visiblePersonShifts=personShifts.filter(x=>shiftInterval(x,days[0]));
+          const visiblePersonShifts=personShifts.filter(x=>x.kind!=="vacation"&&shiftInterval(x,days[0]));
           const laneInfo=makeLanes(visiblePersonShifts,days[0]);
           const rowHeight=24+laneInfo.lanes*43;
-          return <div className="rosterRow" key={uid} style={{minHeight:rowHeight}}><div className="rosterUser"><div className="personAvatar">{String(username||"?").slice(0,1).toUpperCase()}</div><div><strong>{username}</strong><small>{personShifts.filter(x=>x.kind!=="vacation").length} szolgálat</small></div></div><div className="rosterTimeline" style={{minHeight:rowHeight}}>
+          return <div className="rosterRow" key={uid} style={{minHeight:rowHeight}}><div className="rosterUser"><div className="personAvatar">{String(username||"?").slice(0,1).toUpperCase()}</div><div><strong>{username}</strong><small>{personShifts.filter(x=>x.kind==="service").length} szolgálat</small></div></div><div className="rosterTimeline" style={{minHeight:rowHeight}}>
             {days.map((d,i)=><div className="rosterCell" key={i} style={{minHeight:rowHeight}}></div>)}
             {personShifts.filter(x=>x.kind==="vacation").map(x=>{const idx=Math.round((fromISO(x.date)-days[0])/86400000);if(idx<0||idx>=10)return null;return <button key={x.id} className="rosterVacation" style={{left:`${idx*10}%`,width:"10%"}} onClick={()=>setSelectedShift(x)} title="Szabadság">×</button>})}
             {personShifts.filter(x=>x.kind!=="vacation").map(x=>{const p=shiftInterval(x,days[0]);if(!p)return null;const overnight=p.overnight;const lane=laneInfo.laneById[x.id]??0;const overtime=x.kind==="overtime";return <button key={x.id} className={`rosterShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""} ${overtime?"overtimeShift":""}`} style={{...shiftStyle(p),top:10+lane*43}} onClick={()=>setSelectedShift(x)} title={`${x.start}–${x.end}`}><span>{x.start}–{x.end}{overnight&&!overtime&&<Moon className="nightIcon"/>}</span></button>})}
           </div></div>
         }):<div className="tabloEmpty">Nincs a szűrésnek megfelelő szolgálat.</div>}
-      </div>}
+      </div>:<MonthlyRoster data={filtered} selectedDate={selectedDate} onSelect={setSelectedShift}/>}
       <div className="timelineLegend"><span><i className="legendDot"></i> Járőr szolgálat</span><span><i className="legendDot other"></i> Egyéb</span><span><i className="legendDot overtimeLegend"></i> Túlóra</span><span><i className="legendX">×</i> Szabadság</span><span>↪ átnyúló / éjszakai</span></div>
       <p className="tabloNotice">A Tabló az elmúlt 90 nap és a jövőbeli szolgálatok adatait jeleníti meg. 10 nap látható egyszerre.</p>
     </main>
@@ -185,6 +187,32 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
       <button className="tabloDetailClose" onClick={()=>setSelectedShift(null)}>Bezárás</button>
     </div></div>}
   </div>
+}
+
+
+function MonthlyRoster({data,selectedDate,onSelect}){
+  const year=selectedDate.getFullYear(), month=selectedDate.getMonth();
+  const days=Array.from({length:new Date(year,month+1,0).getDate()},(_,i)=>new Date(year,month,i+1));
+  const users=[...new Map(data.map(x=>[x.user_id,x.username])).entries()];
+  return <div className="card monthRoster"><div className="monthRosterHead"><div className="monthHeadName">ÁLLOMÁNY</div><div className="monthHeaderDays">{days.map(d=><div key={iso(d)} className={iso(d)===iso(new Date())?"todayCol":""}>{d.getDate()}</div>)}</div></div>{users.length?users.map(([uid,name])=><div className="monthRosterRow" key={uid}><div className="monthRosterUser"><div className="personAvatar">{String(name||"?").slice(0,1).toUpperCase()}</div><div><strong>{name}</strong><small>{data.filter(x=>String(x.user_id)===String(uid)&&x.kind==="service").length} szolgálat</small></div></div><div className="monthRosterDays">{days.map(d=>{const key=iso(d);const items=data.filter(x=>String(x.user_id)===String(uid)&&dateKey(x.date)===key);return <div key={key} className="monthCell">{items.filter(x=>x.kind==="vacation").map(x=><button key={x.id} className="monthVacation" onClick={()=>onSelect(x)}>×</button>)}{items.filter(x=>x.kind!=="vacation").map(x=><button key={x.id} className={`monthMark ${x.kind==="overtime"?"monthOvertime":""}`} onClick={()=>onSelect(x)} title={`${x.start}–${x.end}`}>{x.kind==="overtime"?"+":""}</button>)}</div>})}</div></div>):<div className="tabloEmpty">Nincs a hónapra illeszkedő bejegyzés.</div>}</div>
+}
+
+function StatsPage({shifts,user,dark,onBack,onToggleDark,onLogout}){
+  const [month,setMonth]=useState(new Date(new Date().getFullYear(),new Date().getMonth(),1));
+  const key=`${month.getFullYear()}-${pad(month.getMonth()+1)}`;
+  const items=shifts.filter(x=>dateKey(x.date).startsWith(key));
+  const services=items.filter(x=>x.kind==="service"), overtime=items.filter(x=>x.kind==="overtime"), vacation=items.filter(x=>x.kind==="vacation");
+  const hours=xs=>xs.reduce((a,x)=>a+duration(x.start,x.end),0);
+  const byType=TYPES.map(t=>({t,n:services.filter(x=>x.type===t).length,h:hours(services.filter(x=>x.type===t))}));
+  return <div className="statsPage"><header className="nav"><div className="brand"><div className="brandIcon"><Clock3/></div><div><b>Szolgálat</b><span>Statisztikák</span></div></div><div className="navRight"><button className="round" onClick={onToggleDark}>{dark?<Sun/>:<Moon/>}</button><button className="round" onClick={onBack}><ArrowLeft/></button><button className="round logout" onClick={onLogout}><LogOut/></button></div></header><main><section className="pageHero"><div><div className="kicker">SAJÁT STATISZTIKÁK</div><h1>{month.toLocaleDateString("hu-HU",{month:"long",year:"numeric"})}</h1><p>{user.username} havi összesítése.</p></div><div className="monthPager"><button onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}><ChevronLeft/></button><button onClick={()=>setMonth(new Date())}>Ma</button><button onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}><ChevronRight/></button></div></section><div className="stats"><Stat icon={<Clock3/>} title="Szolgálati idő" value={`${hours(services).toFixed(1)} óra`} sub={`${services.length} szolgálat`}/><Stat icon={<Timer/>} title="Túlóra" value={`${hours(overtime).toFixed(1)} óra`} sub={`${overtime.length} bejegyzés`}/><Stat icon={<CalendarDays/>} title="Szabadság" value={vacation.length} sub="nap"/></div><section className="statsGrid"><div className="card statPanel"><h2>Szolgálattípusok</h2>{byType.map(x=><div className="statRow" key={x.t}><span>{x.t}</span><b>{x.n} db · {x.h.toFixed(1)} óra</b></div>)}</div><div className="card statPanel"><h2>Havi összegzés</h2><div className="bigNumber">{(hours(services)+hours(overtime)).toFixed(1)} óra</div><p>szolgálat + túlóra együtt</p><div className="statRow"><span>Első bejegyzés</span><b>{items.length?items.sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start))[0].date:"—"}</b></div><div className="statRow"><span>Szolgálatos napok</span><b>{new Set(services.map(x=>x.date)).size}</b></div></div></section></main></div>
+}
+
+function AdminPage({dark,onBack,onToggleDark,onLogout}){
+  const [data,setData]=useState({users:[]}),[loading,setLoading]=useState(true),[error,setError]=useState("");
+  const load=()=>{setLoading(true);api("/api/admin").then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false))};
+  useEffect(()=>{load()},[]);
+  const remove=async u=>{if(!confirm(`Biztosan törlöd a(z) ${u.username} felhasználót? A hozzá tartozó szolgálatok is törlődnek.`))return;try{await api(`/api/admin/users/${u.id}`,{method:"DELETE"});load()}catch(e){setError(e.message)}};
+  return <div className="adminPage"><header className="nav"><div className="brand"><div className="brandIcon"><Users/></div><div><b>Szolgálat</b><span>Adminisztráció</span></div></div><div className="navRight"><button className="round" onClick={onToggleDark}>{dark?<Sun/>:<Moon/>}</button><button className="round" onClick={onBack}><ArrowLeft/></button><button className="round logout" onClick={onLogout}><LogOut/></button></div></header><main><section className="pageHero"><div><div className="kicker">ADMINISZTRÁCIÓ</div><h1>Felhasználók</h1><p>Felhasználók és rögzített bejegyzések áttekintése.</p></div></section>{error&&<div className="error pageError">{error}</div>}{loading?<div className="card tabloEmpty">Betöltés…</div>:<section className="card adminTable"><div className="adminTableHead"><span>Felhasználó</span><span>E-mail</span><span>Szolgálat</span><span>Túlóra</span><span>Óra</span><span>Művelet</span></div>{data.users.map(u=><div className="adminTableRow" key={u.id}><div><strong>{u.username}</strong><small>{new Date(u.created_at).toLocaleDateString("hu-HU")}</small></div><span>{u.email||"—"}</span><span>{u.service_count}</span><span>{u.overtime_count}</span><span>{Number(u.hours||0).toFixed(1)}</span><button className="adminDelete" disabled={u.username==="solteszjanos14"} onClick={()=>remove(u)}><Trash2/></button></div>)}</section>}</main></div>
 }
 
 function Stat({icon,title,value,sub}){return <div className="stat card"><div className="statIcon">{icon}</div><div><span>{title}</span><strong>{value}</strong><small>{sub}</small></div></div>}
