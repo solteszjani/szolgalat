@@ -14,7 +14,7 @@ export default async function handler(req,res){
       if(!['service','vacation','overtime'].includes(kind))return res.status(400).json({error:"Érvénytelen bejegyzéstípus"});
       if(kind==='vacation'){type='Szabadság';}
       if(kind==='overtime' && parent_shift_id){
-        const parent=await db.query("SELECT id,date,start_time,end_time FROM shifts WHERE id=$1 AND user_id=$2 AND kind='service'",[parent_shift_id,user.id]);
+        const parent=await db.query("SELECT id,TO_CHAR(date,'YYYY-MM-DD') AS date,start_time,end_time FROM shifts WHERE id=$1 AND user_id=$2 AND kind='service'",[parent_shift_id,user.id]);
         if(!parent.rowCount)return res.status(400).json({error:"A kapcsolódó szolgálat nem található"});
         start=parent.rows[0].end_time;
         const overnight=String(parent.rows[0].end_time)<=String(parent.rows[0].start_time);
