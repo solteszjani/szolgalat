@@ -440,12 +440,14 @@
 
 
 /* Szabadság + túlóra */
+.calendarSickMark{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);font-style:normal;font-size:25px;line-height:1;font-weight:950;color:#ef4444;text-shadow:0 2px 5px rgba(239,68,68,.22);pointer-events:none}
 .calendarVacationMark{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);font-style:normal;font-size:25px;line-height:1;font-weight:950;color:#ef4444;text-shadow:0 2px 5px rgba(239,68,68,.22);pointer-events:none}
 .days button{position:relative}
-.vacationShift .stripe{background:#ef4444}.vacationBadge{background:#fee2e2!important;color:#dc2626!important}.dark .vacationBadge{background:rgba(239,68,68,.14)!important;color:#f87171!important}
+.vacationShift .stripe,.sickShift .stripe{background:#ef4444}.vacationBadge{background:#fee2e2!important;color:#dc2626!important}.dark .vacationBadge{background:rgba(239,68,68,.14)!important;color:#f87171!important}
 .overtimeShift .stripe{background:#ef4444!important}.overtimeShift .badge{color:#ef4444!important}.overtimeShift{border-color:rgba(239,68,68,.18)}
+.sickInfo{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:13px;border:1px solid #fecaca;background:#fff7f7;color:#991b1b;font-size:11px}.dark .sickInfo{background:rgba(127,29,29,.14);border-color:#5b2525;color:#fca5a5}.sickInfo span{font-size:10px;opacity:.8}
 .vacationInfo,.overtimeInfo{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:13px;border:1px solid #fecaca;background:#fff7f7;color:#991b1b;font-size:11px}.overtimeInfo{border-color:#fecaca;background:#fff7f7}.dark .vacationInfo,.dark .overtimeInfo{background:rgba(127,29,29,.14);border-color:#5b2525;color:#fca5a5}.vacationInfo span,.overtimeInfo span{font-size:10px;opacity:.8}
-.rosterVacation{position:absolute;top:50%;transform:translateY(-50%);height:48px;border:0;background:transparent;color:#ef4444;font-size:36px;font-weight:950;line-height:1;z-index:6;cursor:pointer;text-shadow:0 2px 7px rgba(239,68,68,.28)}.rosterVacation:hover{background:rgba(239,68,68,.06);border-radius:8px}
+.rosterVacation{position:absolute;top:50%;transform:translateY(-50%);height:48px;border:0;background:transparent;color:#ef4444;font-size:36px;font-weight:950;line-height:1;z-index:6;cursor:pointer;text-shadow:0 2px 7px rgba(239,68,68,.28)}.rosterVacation:hover{background:rgba(239,68,68,.06);border-radius:8px}.rosterSick{font-size:30px!important}.legendB{font-size:16px;line-height:8px;color:#ef4444;font-style:normal;font-weight:950}
 .rosterShift.overtimeShift{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 5px 12px rgba(239,68,68,.24);border-radius:0 9px 9px 0!important;width:12px!important;min-width:12px!important;max-width:12px!important;padding:0!important;overflow:hidden!important}.rosterShift.overtimeShift span{display:none!important;font-size:0}
 .timelineLegend .overtimeLegend{background:#ef4444}.legendX{font-size:17px;line-height:8px;color:#ef4444;font-style:normal;font-weight:900}
 @media(max-width:700px){.rosterVacation{font-size:34px;height:44px}.rosterShift.overtimeShift span{font-size:8px}}
@@ -650,7 +652,7 @@
   line-height:1;
   cursor:pointer;
 }
-.tabloPage .monthVacation:hover{
+.tabloPage .monthSick{font-size:24px}.tabloPage .monthVacation:hover{
   background:rgba(239,68,68,.07);
 }
 .dark .tabloPage .monthHeaderDays>div{

@@ -12,10 +12,11 @@ export default async function handler(req,res){
     if(req.method==="POST"){
       let {date,start='00:00',end='00:00',type,kind='service',parent_shift_id=null,call_sign="",location="",note=""}=req.body||{};
       if(!date||!type)return res.status(400).json({error:"Hiányzó kötelező adat"});
-      if(!['service','vacation','overtime'].includes(kind))return res.status(400).json({error:"Érvénytelen bejegyzéstípus"});
+      if(!['service','vacation','sick','overtime'].includes(kind))return res.status(400).json({error:"Érvénytelen bejegyzéstípus"});
       if(kind==='service' && (!start||!end))return res.status(400).json({error:"A szolgálat kezdése és befejezése kötelező"});
       if(kind==='overtime' && (!parent_shift_id||!end))return res.status(400).json({error:"A túlórához kapcsolódó szolgálat és befejezés kötelező"});
       if(kind==='vacation'){type='Szabadság';start='00:00';end='00:00';}
+      if(kind==='sick'){type='Betegség';start='00:00';end='00:00';}
       if(kind==='overtime'){
         const parent=await db.query("SELECT id,TO_CHAR(date,'YYYY-MM-DD') AS date,start_time,end_time FROM shifts WHERE id=$1 AND user_id=$2 AND kind='service'",[parent_shift_id,user.id]);
         if(!parent.rowCount)return res.status(400).json({error:"A kapcsolódó szolgálat nem található"});
