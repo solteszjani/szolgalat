@@ -706,3 +706,38 @@
 .tabloPage .monthShift.overnight{
   overflow:visible;
 }
+
+
+/* Rendszerállapot */
+.statusPage{display:flex;flex-direction:column;gap:18px;padding-bottom:40px}
+.statusTop{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px}
+.statusTop>div>span,.statusPanel>span,.statusService>div:nth-child(2)>span{display:block;font-size:11px;letter-spacing:.12em;font-weight:800;color:#64748b}
+.statusTop h2{margin:5px 0 3px;font-size:24px}
+.statusTop small{color:#64748b}
+.statusRefresh{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.statusGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.statusGrid.statusStats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.statusService{display:flex;align-items:center;gap:15px;padding:20px}
+.statusIcon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:rgba(59,130,246,.1);color:#3b82f6}
+.statusIcon svg{width:21px;height:21px}
+.statusService h3{margin:5px 0 3px;font-size:17px}
+.statusService small{color:#64748b}
+.statusDot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.statusDot.online{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.statusPanel{padding:21px 22px}
+.statusPanel>strong{display:block;font-size:32px;margin:7px 0 14px}
+.statusRows{display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(148,163,184,.18);padding-top:12px}
+.statusRows div{display:flex;justify-content:space-between;gap:12px;color:#64748b;font-size:13px}
+.statusRows b{color:inherit;font-weight:700;text-align:right}
+@media(max-width:1000px){
+  .statusGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statusGrid.statusStats{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .statusTop{align-items:flex-start;flex-direction:column;padding:18px}
+  .statusGrid{grid-template-columns:1fr}
+  .statusService{padding:17px}
+  .statusPanel{padding:18px}
+}
+.dark-mode .statusTop small,.dark-mode .statusService small,.dark-mode .statusRows div{color:#94a3b8}
+.dark-mode .statusTop>div>span,.dark-mode .statusPanel>span,.dark-mode .statusService>div:nth-child(2)>span{color:#94a3b8}
