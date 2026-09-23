@@ -505,3 +505,50 @@
 
 /* Admin – felhasználókezelés és rendszerbeállítások */
 .adminTabs{display:flex;gap:10px;margin:0 0 18px;flex-wrap:wrap}.adminTabs button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border,#dbe3ef);background:var(--card,#fff);color:inherit;border-radius:12px;padding:11px 15px;font-weight:700;cursor:pointer}.adminTabs button svg{width:17px;height:17px}.adminTabs button.active{background:#2563eb;color:#fff;border-color:#2563eb}.adminActions{display:flex;gap:6px;justify-content:flex-end}.adminActions button{width:36px;height:36px;border-radius:10px;border:1px solid var(--border,#dbe3ef);display:grid;place-items:center;cursor:pointer}.adminActions svg{width:17px;height:17px}.adminEdit{background:#eff6ff;color:#2563eb}.adminDelete{background:#fef2f2;color:#dc2626}.adminDelete:disabled{opacity:.35;cursor:not-allowed}.settingsPanel{padding:22px}.settingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.settingsGrid label{display:flex;flex-direction:column;gap:8px;font-weight:700}.settingsGrid label.full{grid-column:1/-1}.settingsGrid input,.settingsGrid textarea{width:100%;box-sizing:border-box;border:1px solid var(--border,#dbe3ef);background:var(--input,#fff);color:inherit;border-radius:12px;padding:12px 13px;font:inherit}.settingsGrid textarea{min-height:130px;resize:vertical;line-height:1.5}.settingsGrid small{font-weight:400;opacity:.7}.settingsBottom{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border,#dbe3ef);font-size:13px;opacity:.9}.settingsBottom .save{display:inline-flex;align-items:center;gap:8px}.settingsBottom .save svg{width:17px}.adminEditor{max-width:680px}@media(max-width:800px){.settingsGrid{grid-template-columns:1fr}.settingsGrid label.full{grid-column:auto}.settingsBottom{flex-direction:column;align-items:stretch}.settingsBottom .save{justify-content:center}.adminTable{overflow-x:auto}.adminTableHead,.adminTableRow{min-width:760px}}
+
+/* ADMIN – rendszerbeállítások sötét téma */
+.dark .settingsPanel {
+  background: #101b2b !important;
+  border-color: #24344a !important;
+  color: #f8fafc;
+}
+
+.dark .settingsGrid label {
+  color: #e2e8f0;
+}
+
+.dark .settingsGrid input,
+.dark .settingsGrid textarea {
+  background: #0d1726 !important;
+  color: #f8fafc !important;
+  border: 1px solid #2a3b53 !important;
+  caret-color: #fff;
+}
+
+.dark .settingsGrid input:focus,
+.dark .settingsGrid textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .16);
+  outline: none;
+}
+
+.dark .settingsGrid small {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+.dark .settingsBottom {
+  border-color: #24344a !important;
+  color: #94a3b8;
+}
+
+.dark .adminTabs button:not(.active) {
+  background: #101b2b !important;
+  color: #dbe7f4 !important;
+  border-color: #2a3b53 !important;
+}
+
+.dark .adminTabs button:not(.active):hover {
+  background: #16253a !important;
+  border-color: #3b82f6 !important;
+}
