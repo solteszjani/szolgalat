@@ -134,7 +134,7 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
           const personShifts=filtered.filter(x=>String(x.user_id)===String(uid));
           return <div className="rosterRow" key={uid}><div className="rosterUser"><div className="personAvatar">{String(username||"?").slice(0,1).toUpperCase()}</div><div><strong>{username}</strong><small>{personShifts.length} szolgálat</small></div></div><div className="rosterTimeline">
             {days.map((d,i)=><div className="rosterCell" key={i}></div>)}
-            {personShifts.map(x=>days.map((d,i)=>{const p=shiftParts(x,d);if(!p)return null;const startPart=p.from,endPart=p.to;const overnight=p.overnight;return <button key={`${x.id}-${i}`} className={`rosterShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""}`} style={{...shiftStyle(p),top:19+((personShifts.findIndex(y=>y.id===x.id)%2)*41)}} onClick={()=>setSelectedShift(x)} title={`${x.start}–${x.end}`}>{i===0||startPart>0?<span>{x.start}–{x.end}{overnight&&<Moon className="nightIcon"/>}</span>:<span>↳ {x.end}</span>}</button>})}
+            {personShifts.map(x=>days.map((d,i)=>{const p=shiftParts(x,d);if(!p)return null;const startPart=p.from,endPart=p.to;const overnight=p.overnight;return <button key={`${x.id}-${i}`} className={`rosterShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""}`} style={{...shiftStyle(p),top:19+((personShifts.findIndex(y=>y.id===x.id)%2)*41)}} onClick={()=>setSelectedShift(x)} title={`${x.start}–${x.end}`}>{i===0||startPart>0?<span>{x.start}–{x.end}{overnight&&<Moon className="nightIcon"/>}</span>:<span>↳ {x.end}</span>}</button>}))}
           </div></div>
         }):<div className="tabloEmpty">Nincs a szűrésnek megfelelő szolgálat.</div>}
       </div>}
