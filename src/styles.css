@@ -403,3 +403,37 @@
   .rosterShift{height:34px;min-height:34px;padding:0 4px}
   .rosterShift span{font-size:8px}
 }
+
+/* DESKTOP Tabló width fix: fill the available desktop viewport while keeping mobile unchanged */
+@media (min-width: 851px) {
+  .tabloPage {
+    width: 100%;
+    max-width: none;
+  }
+  .tabloPage > main {
+    width: 100%;
+    max-width: 1540px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .tabloPage .roster {
+    width: 100%;
+  }
+  .tabloPage .rosterTop,
+  .tabloPage .rosterRow {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+  .tabloPage .rosterDays,
+  .tabloPage .rosterTimeline {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+  .tabloPage .rosterCell {
+    min-width: 0;
+  }
+}
