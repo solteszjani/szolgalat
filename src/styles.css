@@ -453,26 +453,40 @@
 
 /* Mobil javítás – az egynapos szolgálatok ne lógjanak át a következő napba */
 @media (max-width: 700px) {
+  /* Mobil: az egynapos szolgálat teljes felirata maradjon a saját napi téglalapján belül.
+     Nem levágjuk a szöveget, hanem a blokk szélességéhez igazítjuk a betűméretet. */
   .tabloPage .rosterTimeline {
     overflow: hidden;
   }
 
   .tabloPage .rosterShift:not(.overnight) {
-    overflow: hidden !important;
     box-sizing: border-box;
     max-width: calc(10% - 2px);
+    overflow: hidden !important;
+    container-type: inline-size;
   }
 
   .tabloPage .rosterShift:not(.overnight) span {
-    display: block !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     min-width: 0;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     white-space: nowrap !important;
+    font-size: clamp(5px, 8cqw, 9px) !important;
+    letter-spacing: -0.12px;
+    line-height: 1;
   }
 
-  /* Az átnyúló/éjszakai szolgálat maradhat látható a következő napon is. */
+  /* A nagyon rövid, egy napon belüli szolgálatok kapjanak akkora blokkot,
+     amiben a teljes időintervallum olvasható, de a nap határát nem lépik át. */
+  .tabloPage .rosterShift:not(.overnight) {
+    min-width: 42px;
+  }
+
+  /* Az átnyúló/éjszakai szolgálat továbbra is megjelenhet a következő napon. */
   .tabloPage .rosterShift.overnight {
     overflow: visible;
   }
