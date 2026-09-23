@@ -42,6 +42,9 @@ export async function ensureDb(){
           updated_at TIMESTAMPTZ DEFAULT NOW()
         );
         ALTER TABLE shifts ADD COLUMN IF NOT EXISTS call_sign TEXT DEFAULT '';
+        ALTER TABLE shifts ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'service';
+        ALTER TABLE shifts ADD COLUMN IF NOT EXISTS parent_shift_id INTEGER REFERENCES shifts(id) ON DELETE SET NULL;
+        CREATE INDEX IF NOT EXISTS shifts_parent_idx ON shifts(parent_shift_id);
         UPDATE shifts SET type='Járőr szolgálat' WHERE type='Járőrszolgálat';
         CREATE INDEX IF NOT EXISTS shifts_user_date_idx ON shifts(user_id,date);
         CREATE INDEX IF NOT EXISTS shifts_call_sign_date_idx ON shifts(call_sign,date);
