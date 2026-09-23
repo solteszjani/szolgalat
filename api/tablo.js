@@ -8,7 +8,7 @@ export default async function handler(req,res){
     const r=await db.query(`
       SELECT s.id,s.user_id,COALESCE(u.username,u.email,'Ismeretlen') AS username,
         TO_CHAR(s.date,'YYYY-MM-DD') AS date,s.start_time AS start,s.end_time AS end,
-        s.type,s.location,s.note
+        s.type,s.call_sign,s.location,s.note
       FROM shifts s JOIN users u ON u.id=s.user_id
       WHERE s.date >= CURRENT_DATE - INTERVAL '90 days'
       ORDER BY s.date ASC,s.start_time ASC,username ASC`);

@@ -9,8 +9,8 @@ export default async function handler(req,res){
       return res.status(200).json({ok:true});
     }
     if(req.method==="PUT"){
-      const {date,start,end,type,location="",note=""}=req.body||{};
-      const r=await db.query("UPDATE shifts SET date=$1,start_time=$2,end_time=$3,type=$4,location=$5,note=$6,updated_at=NOW() WHERE id=$7 AND user_id=$8 RETURNING id,TO_CHAR(date,'YYYY-MM-DD') AS date,start_time AS start,end_time AS end,type,location,note",[date,start,end,type,location,note,id,user.id]);
+      const {date,start,end,type,call_sign="",location="",note=""}=req.body||{};
+      const r=await db.query("UPDATE shifts SET date=$1,start_time=$2,end_time=$3,type=$4,call_sign=$5,location=$6,note=$7,updated_at=NOW() WHERE id=$8 AND user_id=$9 RETURNING id,TO_CHAR(date,'YYYY-MM-DD') AS date,start_time AS start,end_time AS end,type,call_sign,location,note",[date,start,end,type,call_sign,location,note,id,user.id]);
       if(!r.rowCount)return res.status(404).json({error:"A szolgálat nem található"});
       const x=r.rows[0];return res.status(200).json({...x,id:String(x.id),date:String(x.date)});
     }

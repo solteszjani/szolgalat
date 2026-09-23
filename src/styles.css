@@ -347,3 +347,6 @@
  .tabloNavDates{grid-column:1/-1;margin-top:0}
  .tabloNavDates button{flex:1}
 }
+.nextCard .nextWith{display:flex;align-items:center;gap:5px;margin-top:8px;color:#cbd5e1}
+.nextCard .nextWith svg{flex:0 0 auto;color:#60a5fa}
+.optional{font-size:.72em;opacity:.58;font-weight:500}.shiftCallSign{display:block;font-size:10px;opacity:.82;margin-top:2px;font-weight:600}.nextWith{display:flex;align-items:center;gap:5px}

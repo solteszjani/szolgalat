@@ -37,10 +37,14 @@ export async function ensureDb(){
           type TEXT NOT NULL,
           location TEXT DEFAULT '',
           note TEXT DEFAULT '',
+          call_sign TEXT DEFAULT '',
           created_at TIMESTAMPTZ DEFAULT NOW(),
           updated_at TIMESTAMPTZ DEFAULT NOW()
         );
+        ALTER TABLE shifts ADD COLUMN IF NOT EXISTS call_sign TEXT DEFAULT '';
+        UPDATE shifts SET type='Járőr szolgálat' WHERE type='Járőrszolgálat';
         CREATE INDEX IF NOT EXISTS shifts_user_date_idx ON shifts(user_id,date);
+        CREATE INDEX IF NOT EXISTS shifts_call_sign_date_idx ON shifts(call_sign,date);
       `);
       await db.query(`DELETE FROM shifts WHERE date < CURRENT_DATE - INTERVAL '90 days'`);
       return true;
