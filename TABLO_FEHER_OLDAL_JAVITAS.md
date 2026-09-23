@@ -1,9 +1,5 @@
-# Tabló fehér oldal javítása
+# Tabló fehér oldal – javítás
 
-A Tabló komponens a `cfg.service_types` értéket használta, de a `cfg` állapot nem volt deklarálva a komponensen belül. Ez React futásidejű hibát okozott, ezért a Tabló megnyitásakor fehér oldal jelent meg.
+A Tabló adatbetöltése most csak tömböt fogad el, hibás API-válasz esetén nem omlik össze az oldal. A Tabló számításai védve vannak hiányzó dátum/idő adatok ellen, és az alkalmazás kapott egy React Error Boundary-t is, hogy egy váratlan kliensoldali hiba ne eredményezzen üres fehér oldalt.
 
-Javítás:
-- `cfg` állapot hozzáadva a Tabló komponenshez.
-- A `/api/settings` betöltése hozzáadva.
-- Alapértelmezett szolgálattípusok használata akkor is, ha a beállítás API nem érhető el.
-- Az `api/health.js` eltávolítva a Vercel Serverless Function darabszámának csökkentésére.
+A felesleges `api/index.js` entrypoint törölve lett, így Vercel Hobby csomagon a Serverless Function limit alatt marad a projekt.

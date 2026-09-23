@@ -4,11 +4,18 @@ import{createRoot}from"react-dom/client";
 import{CalendarDays,Plus,Clock3,MapPin,FileText,Pencil,Trash2,ChevronLeft,ChevronRight,Moon,Sun,Save,X,Timer,BriefcaseBusiness,LogOut,RefreshCw,Cloud,CloudOff,Users,Table2,ArrowLeft,Search}from"lucide-react";
 import"./styles.css";
 import{registerServiceWorker}from"./registerSW.js";
-const TYPES=["Járőr szolgálat","Egyéb","Blaha Poszt","Pápa tér poszt"],ENTRY_TYPES=["Szolgálat","Szabadság","Túlóra"],CALLSIGNS=["Józsefváros-121","Józsefváros-122","Józsefváros-123","Józsefváros-321","Józsefváros-322","Józsefváros-491","Józsefváros-141"],COLORS={"Járőr szolgálat":"#3b82f6","Egyéb":"#06b6d4","Blaha Poszt":"#8b5cf6","Pápa tér poszt":"#f59e0b"},pad=n=>String(n).padStart(2,"0"),iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,dateKey=v=>{if(v instanceof Date)return Number.isNaN(v.getTime())?"":iso(v);const s=String(v??"");const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:""},fromISO=s=>{const k=dateKey(s);if(!k)return new Date(NaN);let[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)},mins=t=>{let[h,m]=t.split(":").map(Number);return h*60+m},duration=(a,b)=>{let n=mins(b)-mins(a);if(n<0)n+=1440;return n/60};
+const TYPES=["Járőr szolgálat","Egyéb","Blaha Poszt","Pápa tér poszt"],ENTRY_TYPES=["Szolgálat","Szabadság","Túlóra"],CALLSIGNS=["Józsefváros-121","Józsefváros-122","Józsefváros-123","Józsefváros-321","Józsefváros-322","Józsefváros-491","Józsefváros-141"],COLORS={"Járőr szolgálat":"#3b82f6","Egyéb":"#06b6d4","Blaha Poszt":"#8b5cf6","Pápa tér poszt":"#f59e0b"},pad=n=>String(n).padStart(2,"0"),iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,dateKey=v=>{if(v instanceof Date)return Number.isNaN(v.getTime())?"":iso(v);const s=String(v??"");const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:""},fromISO=s=>{const k=dateKey(s);if(!k)return new Date(NaN);let[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)},mins=t=>{if(typeof t!=="string"||!/^[0-9]{1,2}:[0-9]{2}$/.test(t))return NaN;let[h,m]=t.split(":").map(Number);return h*60+m},duration=(a,b)=>{let n=mins(b)-mins(a);if(n<0)n+=1440;return n/60};
 
 async function api(url,opt={}){let token=localStorage.getItem("sz_token");let r=await fetch(url,{...opt,headers:{"Content-Type":"application/json",...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{})}});let data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||"Hiba történt");return data}
 function Auth({onAuth}){const[register,setRegister]=useState(false),[username,setUsername]=useState(""),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState("");const go=async e=>{e.preventDefault();setError("");setBusy(true);try{let d=await api(register?"/api/auth/register":"/api/auth/login",{method:"POST",body:JSON.stringify({username,email,password})});localStorage.setItem("sz_token",d.token);onAuth(d.user)}catch(e){setError(e.message)}finally{setBusy(false)}};return <div className="auth"><div className="authCard"><div className="authLogo"><CalendarDays/></div><h1>Szolgálat<br/><em>Naptár</em></h1><p>A szolgálatvezénylésed biztonságosan, online.</p><form onSubmit={go}><label>Felhasználónév<input type="text" value={username} onChange={e=>setUsername(e.target.value)} required minLength="3" maxLength="30" autoCapitalize="none" autoCorrect="off" placeholder="pl. kovacs.janos"/></label><label>{register?"E-mail cím (opcionális)":"Felhasználónév vagy e-mail"}{register&&<input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoCapitalize="none" autoCorrect="off" placeholder="pl. nev@example.com"/>}</label><label>Jelszó<input type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength="6" required placeholder="Legalább 6 karakter"/></label>{error&&<div className="error">{error}</div>}<button className="primary authBtn" disabled={busy}>{busy?"Feldolgozás…":register?"Fiók létrehozása":"Bejelentkezés"}</button></form><button className="linkBtn" onClick={()=>setRegister(!register)}>{register?"Már van fiókom":"Még nincs fiókom → Regisztráció"}</button><small className="privacy"><Cloud size={13}/> A szolgálatok online adatbázisban tárolódnak.</small></div></div>}
 
+
+class AppErrorBoundary extends React.Component{
+  constructor(props){super(props);this.state={error:null}}
+  static getDerivedStateFromError(error){return {error}}
+  componentDidCatch(error,info){console.error("Alkalmazás hiba",error,info)}
+  render(){if(this.state.error)return <div className="app dark"><div className="loadingScreen"><CalendarDays/><strong>Az oldal betöltése közben hiba történt.</strong><small style={{maxWidth:520,textAlign:"center",color:"#94a3b8"}}>{this.state.error?.message||"Ismeretlen hiba"}</small><button className="primary" onClick={()=>window.location.reload()}>Újratöltés</button></div></div>;return this.props.children}
+}
 
 function App(){
   const [user,setUser]=useState(null),[shifts,setShifts]=useState([]),[page,setPage]=useState("home");
@@ -102,12 +109,13 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
   const[data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[search,setSearch]=useState(""),[typeFilter,setTypeFilter]=useState("Mind"),[selectedDate,setSelectedDate]=useState(new Date()),[selectedShift,setSelectedShift]=useState(null),[viewMode,setViewMode]=useState("10");
   const[cfg,setCfg]=useState({service_types:TYPES,call_signs:CALLSIGNS});
   useEffect(()=>{api("/api/settings").then(setCfg).catch(()=>{})},[]);
-  const loadTablo=()=>{setLoading(true);api("/api/tablo").then(setData).catch(e=>setError(e.message)).finally(()=>setLoading(false))};
+  const loadTablo=()=>{setLoading(true);setError("");api("/api/tablo").then(d=>setData(Array.isArray(d)?d:[])).catch(e=>{setData([]);setError(e.message||"A Tabló adatai nem tölthetők be.")}).finally(()=>setLoading(false))};
   useEffect(()=>{loadTablo()},[]);
   const days=useMemo(()=>{const base=new Date(selectedDate.getFullYear(),selectedDate.getMonth(),selectedDate.getDate());return Array.from({length:10},(_,i)=>new Date(base.getFullYear(),base.getMonth(),base.getDate()+i))},[selectedDate]);
-  const filtered=data.filter(x=>{const q=search.trim().toLowerCase();const ms=!q||[x.username,x.call_sign,x.type,x.kind,x.location,x.note,x.date,x.start,x.end].join(" ").toLowerCase().includes(q);const mt=typeFilter==="Mind"||x.type===typeFilter;return ms&&mt});
+  const filtered=(Array.isArray(data)?data:[]).filter(x=>{const q=search.trim().toLowerCase();const ms=!q||[x.username,x.call_sign,x.type,x.kind,x.location,x.note,x.date,x.start,x.end].map(v=>v??"").join(" ").toLowerCase().includes(q);const mt=typeFilter==="Mind"||x.type===typeFilter;return ms&&mt});
   const users=useMemo(()=>{const m=new Map();filtered.forEach(x=>{if(!m.has(x.user_id))m.set(x.user_id,x.username)});return [...m.entries()]},[filtered]);
   const shiftInterval=(x,base)=>{
+    if(!x||!x.start||!x.end)return null;
     const startDay=fromISO(dateKey(x.date));
     if(Number.isNaN(startDay.getTime()))return null;
     const start=Math.round((startDay-base)/86400000)*1440+mins(x.start);
@@ -123,10 +131,12 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
     width:`${Math.max((part.to-part.from)/(10*1440)*100,.8)}%`
   });
   const shiftStart=(x,base)=>{
+    if(!x||!x.start)return Number.POSITIVE_INFINITY;
     const diff=Math.round((fromISO(dateKey(x.date))-base)/86400000);
     return diff*1440+mins(x.start);
   };
   const shiftEnd=(x,base)=>{
+    if(!x||!x.start||!x.end)return Number.POSITIVE_INFINITY;
     const start=shiftStart(x,base),sm=mins(x.start),em=mins(x.end);
     return start+(em>sm?em-sm:1440-sm+em);
   };
@@ -246,4 +256,4 @@ function Editor({shift,defaultDate,existingShifts,close,save,remove}){
     {kind==="overtime"&&<div className="overtimeInfo full"><b>Túlóra</b><span>A túlóra a kapcsolódó szolgálat végétől folytatódik, és a Tablóban piros sávként jelenik meg.</span></div>}
   </div><div className="editorBottom">{remove?<button className="delete" onClick={remove}><Trash2/> Törlés</button>:<span/>}<div><button className="cancel" onClick={close}>Mégse</button><button className="save" onClick={submit}><Save/> Mentés</button></div></div></div></div>}
 registerServiceWorker();
-createRoot(document.getElementById("root")).render(<App/>);
+createRoot(document.getElementById("root")).render(<AppErrorBoundary><App/></AppErrorBoundary>);
