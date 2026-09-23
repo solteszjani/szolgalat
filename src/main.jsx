@@ -135,14 +135,21 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
   const[data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[search,setSearch]=useState(""),[typeFilter,setTypeFilter]=useState("Mind"),[selectedDate,setSelectedDate]=useState(new Date()),[selectedShift,setSelectedShift]=useState(null),[viewMode,setViewMode]=useState("10");
   const[cfg,setCfg]=useState({service_types:TYPES,call_signs:CALLSIGNS});
   useEffect(()=>{api("/api/settings").then(setCfg).catch(()=>{})},[]);
-  const loadTablo=()=>{setLoading(true);setError("");api("/api/tablo").then(d=>setData(Array.isArray(d)?d:[])).catch(e=>{setData([]);setError(e.message||"A Tabló adatai nem tölthetők be.")}).finally(()=>setLoading(false))};
+  const loadTablo=(silent=false)=>{
+    if(!silent)setLoading(true);
+    setError("");
+    api("/api/tablo")
+      .then(d=>setData(Array.isArray(d)?d:[]))
+      .catch(e=>{if(!silent){setData([]);setError(e.message||"A Tabló adatai nem tölthetők be.")}})
+      .finally(()=>{if(!silent)setLoading(false)})
+  };
   useEffect(()=>{
     loadTablo();
     let busy=false;
     const refresh=async()=>{
       if(busy || document.hidden)return;
       busy=true;
-      try{await loadTablo();}finally{busy=false;}
+      try{await loadTablo(true);}finally{busy=false;}
     };
     const timer=setInterval(refresh,3000);
     const onFocus=()=>refresh();
