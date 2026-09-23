@@ -363,3 +363,32 @@
   .rosterShift{height:34px;min-height:34px}
   .rosterShift span{font-size:9px}
 }
+
+/* FINAL TABLÓ TIMELINE LAYOUT */
+.tabloPage>main{max-width:1450px;padding-left:18px;padding-right:18px}
+.roster{width:100%;overflow:hidden}
+.rosterTop,.rosterRow{grid-template-columns:175px minmax(0,1fr)}
+.rosterDays{grid-template-columns:repeat(10,minmax(0,1fr))}
+.rosterTimeline{grid-template-columns:repeat(10,minmax(0,1fr));min-width:0;width:100%;position:relative}
+.rosterCell{min-width:0;overflow:visible}
+.rosterShift{height:36px;min-height:36px;border-radius:9px;padding:0 5px;font-size:8px;line-height:1;overflow:hidden}
+.rosterShift span{font-size:8px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.rosterShift.overnight{overflow:visible}
+.rosterShift.overnight span{overflow:visible}
+.rosterUser{padding-left:14px;padding-right:10px}
+@media(max-width:1250px){
+  .tabloPage>main{max-width:100%;}
+  .rosterTop,.rosterRow{width:100%;grid-template-columns:155px 1fr}
+  .roster{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .rosterTop,.rosterRow{min-width:1115px}
+  .rosterDays{grid-template-columns:repeat(10,96px)}
+  .rosterTimeline{grid-template-columns:repeat(10,96px);min-width:960px}
+}
+@media(max-width:700px){
+  .tabloPage>main{padding:18px 10px 80px}
+  .rosterTop,.rosterRow{min-width:1095px;grid-template-columns:145px 1fr}
+  .rosterDays{grid-template-columns:repeat(10,95px)}
+  .rosterTimeline{grid-template-columns:repeat(10,95px);min-width:950px}
+  .rosterShift{height:34px;min-height:34px;padding:0 4px}
+  .rosterShift span{font-size:8px}
+}
