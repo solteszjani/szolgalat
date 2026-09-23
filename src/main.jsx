@@ -208,7 +208,8 @@ function MonthlyRoster({data,selectedDate,onSelect}){
   const dayCount=days.length;
   const base=days[0];
   const users=[...new Map(data.map(x=>[x.user_id,x.username])).entries()];
-  const dayWidth=`repeat(${dayCount},minmax(32px,1fr))`;
+  const monthWidth=Math.max(dayCount*160,1600);
+  const dayWidth=`repeat(${dayCount},minmax(160px,1fr))`;
   const dayMinutes=1440;
   const totalMinutes=dayCount*dayMinutes;
 
@@ -250,9 +251,9 @@ function MonthlyRoster({data,selectedDate,onSelect}){
   const fmtDay=d=>d.toLocaleDateString("hu-HU",{weekday:"short"}).replace(".","").toUpperCase();
 
   return <div className="card monthRoster">
-    <div className="monthRosterHead" style={{gridTemplateColumns:"190px minmax(900px,1fr)"}}>
+    <div className="monthRosterHead" style={{gridTemplateColumns:`190px ${monthWidth}px`,minWidth:`${190+monthWidth}px`}}>
       <div className="monthHeadName">ÁLLOMÁNY</div>
-      <div className="monthHeaderDays" style={{gridTemplateColumns:dayWidth}}>
+      <div className="monthHeaderDays" style={{gridTemplateColumns:dayWidth,minWidth:`${monthWidth}px`}}>
         {days.map(d=><div key={iso(d)} className={iso(d)===iso(new Date())?"todayCol":""}>
           <b>{fmtDay(d)}</b><span>{d.getDate()}</span>
         </div>)}
@@ -265,14 +266,14 @@ function MonthlyRoster({data,selectedDate,onSelect}){
       const laneInfo=makeLanes(visible);
       const rowHeight=24+laneInfo.lanes*43;
 
-      return <div className="monthRosterRow" key={uid} style={{minHeight:rowHeight,gridTemplateColumns:"190px minmax(900px,1fr)"}}>
+      return <div className="monthRosterRow" key={uid} style={{minHeight:rowHeight,gridTemplateColumns:`190px ${monthWidth}px`,minWidth:`${190+monthWidth}px`}}>
         <div className="monthRosterUser">
           <div className="personAvatar">{String(name||"?").slice(0,1).toUpperCase()}</div>
           <div><strong>{name}</strong><small>{personShifts.filter(x=>x.kind==="service").length} szolgálat</small></div>
         </div>
 
-        <div className="monthRosterTimeline" style={{minHeight:rowHeight}}>
-          <div className="monthRosterGrid" style={{gridTemplateColumns:dayWidth,minHeight:rowHeight}}>
+        <div className="monthRosterTimeline" style={{minHeight:rowHeight,minWidth:`${monthWidth}px`}}>
+          <div className="monthRosterGrid" style={{gridTemplateColumns:dayWidth,minHeight:rowHeight,minWidth:`${monthWidth}px`}}>
             {days.map(d=><div className="monthCell" key={iso(d)}></div>)}
           </div>
 
@@ -285,14 +286,18 @@ function MonthlyRoster({data,selectedDate,onSelect}){
           })}
 
           {visible.map(x=>{
-            const p=shiftPart(x);
-            if(!p)return null;
-            const overnight=p.overnight;
+            const startIdx=Math.round((fromISO(dateKey(x.date))-base)/86400000);
+            if(startIdx<0||startIdx>=dayCount)return null;
+            const overnight=mins(x.end)<=mins(x.start);
             const overtime=x.kind==="overtime";
             const lane=laneInfo.laneById[x.id]??0;
             return <button key={x.id}
               className={`monthShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""} ${overtime?"monthOvertimeShift":""}`}
-              style={{...p.style,top:10+lane*43}}
+              style={{
+                left:`${startIdx/dayCount*100}%`,
+                width:`${100/dayCount}%`,
+                top:10+lane*43
+              }}
               onClick={()=>onSelect(x)}
               title={`${x.start}–${x.end}${x.note?` · ${x.note}`:""}`}>
               <span>{x.start}–{x.end}{overnight&&!overtime&&<Moon className="nightIcon"/>}</span>
