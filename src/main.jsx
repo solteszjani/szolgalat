@@ -106,12 +106,36 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
   const shiftParts=(x,day)=>{
     const d=dateKey(x.date),dayDiff=Math.round((day-fromISO(d))/86400000),sm=mins(x.start),em=mins(x.end);
     if(!d||dayDiff<0||dayDiff>1)return null;
-    if(dayDiff===0){if(em>sm)return {from:sm,to:em,overnight:false};return {from:sm,to:1440,overnight:true};}
-    if(dayDiff===1&&em<=sm)return {from:0,to:em,overnight:true};
+    if(dayDiff===0){
+      if(em>sm)return {dayIndex:dayDiff,from:sm,to:em,overnight:false};
+      return {dayIndex:dayDiff,from:sm,to:1440,overnight:true};
+    }
+    if(dayDiff===1&&em<=sm)return {dayIndex:dayDiff,from:0,to:em,overnight:true};
     return null;
   };
   const dayWidth=100/10;
-  const shiftStyle=(part)=>({left:`${(part.from/1440)*dayWidth}%`,width:`${Math.max((part.to-part.from)/1440*dayWidth,2.5)}%`});
+  const shiftStyle=(part)=>({
+    left:`${(part.dayIndex + part.from/1440)*dayWidth}%`,
+    width:`${Math.max((part.to-part.from)/1440*dayWidth,2.5)}%`
+  });
+  const shiftStart=(x,base)=>{
+    const diff=Math.round((fromISO(dateKey(x.date))-base)/86400000);
+    return diff*1440+mins(x.start);
+  };
+  const shiftEnd=(x,base)=>{
+    const start=shiftStart(x,base),sm=mins(x.start),em=mins(x.end);
+    return start+(em>sm?em-sm:1440-sm+em);
+  };
+  const makeLanes=(items,base)=>{
+    const lanes=[],laneById={};
+    [...items].sort((a,b)=>shiftStart(a,base)-shiftStart(b,base)).forEach(x=>{
+      const start=shiftStart(x,base),end=shiftEnd(x,base);
+      let lane=lanes.findIndex(lastEnd=>lastEnd<=start);
+      if(lane<0){lane=lanes.length;lanes.push(end)}else lanes[lane]=end;
+      laneById[x.id]=lane;
+    });
+    return {laneById,lanes:Math.max(1,lanes.length)};
+  };
   const fmtDay=d=>d.toLocaleDateString("hu-HU",{weekday:"short"}).replace(".","").toUpperCase();
   const fmtFull=d=>d.toLocaleDateString("hu-HU",{year:"numeric",month:"long",day:"numeric"});
   return <div className="tabloPage">
@@ -132,9 +156,12 @@ function Tablo({dark,onBack,onToggleDark,onLogout}){
         <div className="rosterTop"><div className="rosterNameHead">ÁLLOMÁNY</div><div className="rosterDays">{days.map((d,i)=><div key={i} className={iso(d)===iso(new Date())?"todayCol":""}><b>{fmtDay(d)}</b><span>{d.getDate()}</span></div>)}</div></div>
         {users.length?users.map(([uid,username])=>{
           const personShifts=filtered.filter(x=>String(x.user_id)===String(uid));
-          return <div className="rosterRow" key={uid}><div className="rosterUser"><div className="personAvatar">{String(username||"?").slice(0,1).toUpperCase()}</div><div><strong>{username}</strong><small>{personShifts.length} szolgálat</small></div></div><div className="rosterTimeline">
-            {days.map((d,i)=><div className="rosterCell" key={i}></div>)}
-            {personShifts.map(x=>days.map((d,i)=>{const p=shiftParts(x,d);if(!p)return null;const startPart=p.from,endPart=p.to;const overnight=p.overnight;return <button key={`${x.id}-${i}`} className={`rosterShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""}`} style={{...shiftStyle(p),top:19+((personShifts.findIndex(y=>y.id===x.id)%2)*41)}} onClick={()=>setSelectedShift(x)} title={`${x.start}–${x.end}`}>{i===0||startPart>0?<span>{x.start}–{x.end}{overnight&&<Moon className="nightIcon"/>}</span>:<span>↳ {x.end}</span>}</button>}))}
+          const visiblePersonShifts=personShifts.filter(x=>days.some(d=>shiftParts(x,d)));
+          const laneInfo=makeLanes(visiblePersonShifts,days[0]);
+          const rowHeight=24+laneInfo.lanes*43;
+          return <div className="rosterRow" key={uid} style={{minHeight:rowHeight}}><div className="rosterUser"><div className="personAvatar">{String(username||"?").slice(0,1).toUpperCase()}</div><div><strong>{username}</strong><small>{personShifts.length} szolgálat</small></div></div><div className="rosterTimeline" style={{minHeight:rowHeight}}>
+            {days.map((d,i)=><div className="rosterCell" key={i} style={{minHeight:rowHeight}}></div>)}
+            {personShifts.map(x=>days.map((d,i)=>{const p=shiftParts(x,d);if(!p)return null;const overnight=p.overnight;const lane=laneInfo.laneById[x.id]||0;return <button key={`${x.id}-${i}`} className={`rosterShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""}`} style={{...shiftStyle(p),top:10+lane*43}} onClick={()=>setSelectedShift(x)} title={`${x.start}–${x.end}`}><span>{i===0?`${x.start}–${x.end}`:`↳ ${x.end}`}{overnight&&<Moon className="nightIcon"/>}</span></button>}))}
           </div></div>
         }):<div className="tabloEmpty">Nincs a szűrésnek megfelelő szolgálat.</div>}
       </div>}
