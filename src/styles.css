@@ -449,3 +449,36 @@
 .rosterShift.overtimeShift{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 5px 12px rgba(239,68,68,.24);border-radius:0 9px 9px 0!important;width:12px!important;min-width:12px!important;max-width:12px!important;padding:0!important;overflow:hidden!important}.rosterShift.overtimeShift span{display:none!important;font-size:0}
 .timelineLegend .overtimeLegend{background:#ef4444}.legendX{font-size:17px;line-height:8px;color:#ef4444;font-style:normal;font-weight:900}
 @media(max-width:700px){.rosterVacation{font-size:34px;height:44px}.rosterShift.overtimeShift span{font-size:8px}}
+
+
+/* Mobil javítás – az egynapos szolgálatok ne lógjanak át a következő napba */
+@media (max-width: 700px) {
+  .tabloPage .rosterTimeline {
+    overflow: hidden;
+  }
+
+  .tabloPage .rosterShift:not(.overnight) {
+    overflow: hidden !important;
+    box-sizing: border-box;
+    max-width: calc(10% - 2px);
+  }
+
+  .tabloPage .rosterShift:not(.overnight) span {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Az átnyúló/éjszakai szolgálat maradhat látható a következő napon is. */
+  .tabloPage .rosterShift.overnight {
+    overflow: visible;
+  }
+
+  .tabloPage .rosterShift.overnight span {
+    overflow: visible;
+    white-space: nowrap;
+  }
+}
