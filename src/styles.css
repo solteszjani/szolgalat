@@ -535,3 +535,156 @@
 .dark .adminTableHead{color:#94a3b8}
 .dark .adminTableRow{color:#e2e8f0}
 .dark .adminActions button:not(.adminEdit):not(.adminDelete){background:#17263a;color:#dbe7f4}
+
+/* Havi Tabló – ugyanaz az idővonalas megjelenítés, mint a 10 napos nézetben */
+.tabloPage .monthRoster{
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:0;
+}
+.tabloPage .monthRosterHead,
+.tabloPage .monthRosterRow{
+  display:grid;
+  grid-template-columns:190px minmax(900px,1fr);
+  min-width:1090px;
+}
+.tabloPage .monthHeaderDays{
+  display:grid;
+  min-width:900px;
+}
+.tabloPage .monthHeaderDays>div{
+  min-width:0;
+  padding:8px 3px;
+  text-align:center;
+  border-left:1px solid #e8edf3;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+}
+.tabloPage .monthHeaderDays>div b{
+  font-size:9px;
+  font-weight:800;
+}
+.tabloPage .monthHeaderDays>div span{
+  font-size:12px;
+  font-weight:800;
+}
+.tabloPage .monthRosterRow{
+  position:relative;
+}
+.tabloPage .monthRosterTimeline{
+  position:relative;
+  min-width:900px;
+  overflow:hidden;
+}
+.tabloPage .monthRosterGrid{
+  position:absolute;
+  inset:0;
+  display:grid;
+  min-width:900px;
+  pointer-events:none;
+}
+.tabloPage .monthRosterGrid .monthCell{
+  min-width:0;
+  min-height:100%;
+}
+.tabloPage .monthShift{
+  position:absolute;
+  z-index:3;
+  height:38px;
+  min-width:58px;
+  padding:0 9px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:9px;
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  font-size:10px;
+  line-height:1;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.tabloPage .monthShift span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.tabloPage .monthShift.otherShift{
+  background:#14b8a6;
+}
+.tabloPage .monthShift.monthOvertimeShift{
+  background:#ef4444;
+}
+.tabloPage .monthShift.overnight{
+  box-shadow:0 4px 12px rgba(0,0,0,.22);
+}
+.tabloPage .monthShift .nightIcon{
+  width:11px;
+  height:11px;
+  flex:none;
+}
+.tabloPage .monthVacation{
+  position:absolute;
+  z-index:4;
+  top:0;
+  bottom:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-left:1px solid rgba(239,68,68,.08);
+  border-right:1px solid rgba(239,68,68,.08);
+  background:transparent;
+  color:#ef4444;
+  font-size:25px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+}
+.tabloPage .monthVacation:hover{
+  background:rgba(239,68,68,.07);
+}
+.dark .tabloPage .monthHeaderDays>div{
+  border-color:#1f3045;
+}
+.dark .tabloPage .monthRosterGrid .monthCell{
+  border-color:#1f3045;
+}
+.dark .tabloPage .monthHeaderDays .todayCol{
+  background:#122844;
+  color:#60a5fa;
+}
+
+@media(max-width:850px){
+  .tabloPage .monthRosterHead,
+  .tabloPage .monthRosterRow{
+    grid-template-columns:160px minmax(1000px,1fr);
+    min-width:1160px;
+  }
+  .tabloPage .monthRosterTimeline,
+  .tabloPage .monthHeaderDays,
+  .tabloPage .monthRosterGrid{
+    min-width:1000px;
+  }
+  .tabloPage .monthShift{
+    min-width:52px;
+    height:36px;
+    padding:0 6px;
+    font-size:9px;
+  }
+  .tabloPage .monthShift span{
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .tabloPage .monthHeadName{
+    padding:10px 10px;
+  }
+}

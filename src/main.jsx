@@ -160,7 +160,7 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
       <div className="navRight"><button className="round" onClick={onToggleDark}>{dark?<Sun/>:<Moon/>}</button><button className="round" title="Statisztikák" onClick={onStats}><Clock3/></button>{isAdmin&&<button className="round" title="Adminisztráció" onClick={onAdmin}><Users/></button>}<button className="round" onClick={onBack}><ArrowLeft/></button><button className="round logout" onClick={onLogout}><LogOut/></button></div>
     </header>
     <main>
-      <section className="tabloHero"><div><div className="kicker">KÖZÖS SZOLGÁLATI TÁBLÓ</div><h1>Tabló</h1><p>Az állomány szolgálatai egy közös, 10 napos idősávban.</p></div><div className="tabloCount"><Users/><strong>{users.length}</strong><span>regisztrált tag</span></div></section>
+      <section className="tabloHero"><div><div className="kicker">KÖZÖS SZOLGÁLATI TÁBLÓ</div><h1>Tabló</h1><p>Az állomány szolgálatai közös, idővonalas nézetben.</p></div><div className="tabloCount"><Users/><strong>{users.length}</strong><span>regisztrált tag</span></div></section>
       <div className="tabloToolbar card">
         <div className="searchBox"><Search/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Keresés név, hívónév vagy szolgálat alapján…"/></div>
         <select className="tabloFilter" value={typeFilter} onChange={e=>setTypeFilter(e.target.value)}><option>Mind</option>{(cfg.service_types||TYPES).map(t=><option key={t}>{t}</option>)}<option>Szabadság</option><option>Túlóra</option></select>
@@ -183,7 +183,7 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
         }):<div className="tabloEmpty">Nincs a szűrésnek megfelelő szolgálat.</div>}
       </div>:<MonthlyRoster data={filtered} selectedDate={selectedDate} onSelect={setSelectedShift}/>}
       <div className="timelineLegend"><span><i className="legendDot"></i> Járőr szolgálat</span><span><i className="legendDot other"></i> Egyéb</span><span><i className="legendDot overtimeLegend"></i> Túlóra</span><span><i className="legendX">×</i> Szabadság</span><span>↪ átnyúló / éjszakai</span></div>
-      <p className="tabloNotice">A Tabló az elmúlt 90 nap és a jövőbeli szolgálatok adatait jeleníti meg. 10 nap látható egyszerre.</p>
+      <p className="tabloNotice">A Tabló az elmúlt 90 nap és a jövőbeli szolgálatok adatait jeleníti meg. A havi nézetben a teljes hónap látható.</p>
     </main>
     {selectedShift&&<div className="modalBg tabloDetailBg" onMouseDown={e=>e.target===e.currentTarget&&setSelectedShift(null)}><div className="tabloDetail card">
       <div className="tabloDetailTop"><div><span>SZOLGÁLATI RÉSZLETEK</span><h2>{selectedShift.kind==="vacation"?"Szabadság":selectedShift.kind==="overtime"?"Túlóra":selectedShift.type}</h2></div><button className="close" onClick={()=>setSelectedShift(null)}><X/></button></div>
@@ -205,8 +205,103 @@ function Tablo({dark,onBack,onToggleDark,onLogout,onStats,onAdmin,isAdmin}){
 function MonthlyRoster({data,selectedDate,onSelect}){
   const year=selectedDate.getFullYear(), month=selectedDate.getMonth();
   const days=Array.from({length:new Date(year,month+1,0).getDate()},(_,i)=>new Date(year,month,i+1));
+  const dayCount=days.length;
+  const base=days[0];
   const users=[...new Map(data.map(x=>[x.user_id,x.username])).entries()];
-  return <div className="card monthRoster"><div className="monthRosterHead"><div className="monthHeadName">ÁLLOMÁNY</div><div className="monthHeaderDays">{days.map(d=><div key={iso(d)} className={iso(d)===iso(new Date())?"todayCol":""}>{d.getDate()}</div>)}</div></div>{users.length?users.map(([uid,name])=><div className="monthRosterRow" key={uid}><div className="monthRosterUser"><div className="personAvatar">{String(name||"?").slice(0,1).toUpperCase()}</div><div><strong>{name}</strong><small>{data.filter(x=>String(x.user_id)===String(uid)&&x.kind==="service").length} szolgálat</small></div></div><div className="monthRosterDays">{days.map(d=>{const key=iso(d);const items=data.filter(x=>String(x.user_id)===String(uid)&&dateKey(x.date)===key);return <div key={key} className="monthCell">{items.filter(x=>x.kind==="vacation").map(x=><button key={x.id} className="monthVacation" onClick={()=>onSelect(x)}>×</button>)}{items.filter(x=>x.kind!=="vacation").map(x=><button key={x.id} className={`monthMark ${x.kind==="overtime"?"monthOvertime":""}`} onClick={()=>onSelect(x)} title={`${x.start}–${x.end}`}>{x.kind==="overtime"?"+":""}</button>)}</div>})}</div></div>):<div className="tabloEmpty">Nincs a hónapra illeszkedő bejegyzés.</div>}</div>
+  const dayWidth=`repeat(${dayCount},minmax(32px,1fr))`;
+  const dayMinutes=1440;
+  const totalMinutes=dayCount*dayMinutes;
+
+  const shiftStart=(x)=>{
+    if(!x?.start)return Number.POSITIVE_INFINITY;
+    const diff=Math.round((fromISO(dateKey(x.date))-base)/86400000);
+    return diff*dayMinutes+mins(x.start);
+  };
+  const shiftEnd=(x)=>{
+    if(!x?.start||!x?.end)return Number.POSITIVE_INFINITY;
+    const start=shiftStart(x),sm=mins(x.start),em=mins(x.end);
+    return start+(em>sm?em-sm:1440-sm+em);
+  };
+  const shiftPart=(x)=>{
+    const start=shiftStart(x),end=shiftEnd(x);
+    if(!Number.isFinite(start)||!Number.isFinite(end))return null;
+    const from=Math.max(0,start),to=Math.min(totalMinutes,end);
+    if(to<=from)return null;
+    return {
+      from,to,
+      overnight:mins(x.end)<=mins(x.start),
+      style:{
+        left:`${from/totalMinutes*100}%`,
+        width:`${Math.max((to-from)/totalMinutes*100,.8)}%`
+      }
+    };
+  };
+  const makeLanes=(items)=>{
+    const lanes=[],laneById={};
+    [...items].sort((a,b)=>shiftStart(a)-shiftStart(b)).forEach(x=>{
+      const p=shiftPart(x);
+      if(!p)return;
+      let lane=lanes.findIndex(lastEnd=>lastEnd<=p.from);
+      if(lane<0){lane=lanes.length;lanes.push(p.to)}else lanes[lane]=p.to;
+      laneById[x.id]=lane;
+    });
+    return {laneById,lanes:Math.max(1,lanes.length)};
+  };
+  const fmtDay=d=>d.toLocaleDateString("hu-HU",{weekday:"short"}).replace(".","").toUpperCase();
+
+  return <div className="card monthRoster">
+    <div className="monthRosterHead" style={{gridTemplateColumns:"190px minmax(900px,1fr)"}}>
+      <div className="monthHeadName">ÁLLOMÁNY</div>
+      <div className="monthHeaderDays" style={{gridTemplateColumns:dayWidth}}>
+        {days.map(d=><div key={iso(d)} className={iso(d)===iso(new Date())?"todayCol":""}>
+          <b>{fmtDay(d)}</b><span>{d.getDate()}</span>
+        </div>)}
+      </div>
+    </div>
+
+    {users.length ? users.map(([uid,name])=>{
+      const personShifts=data.filter(x=>String(x.user_id)===String(uid));
+      const visible=personShifts.filter(x=>x.kind!=="vacation"&&shiftPart(x));
+      const laneInfo=makeLanes(visible);
+      const rowHeight=24+laneInfo.lanes*43;
+
+      return <div className="monthRosterRow" key={uid} style={{minHeight:rowHeight,gridTemplateColumns:"190px minmax(900px,1fr)"}}>
+        <div className="monthRosterUser">
+          <div className="personAvatar">{String(name||"?").slice(0,1).toUpperCase()}</div>
+          <div><strong>{name}</strong><small>{personShifts.filter(x=>x.kind==="service").length} szolgálat</small></div>
+        </div>
+
+        <div className="monthRosterTimeline" style={{minHeight:rowHeight}}>
+          <div className="monthRosterGrid" style={{gridTemplateColumns:dayWidth,minHeight:rowHeight}}>
+            {days.map(d=><div className="monthCell" key={iso(d)}></div>)}
+          </div>
+
+          {personShifts.filter(x=>x.kind==="vacation").map(x=>{
+            const idx=Math.round((fromISO(x.date)-base)/86400000);
+            if(idx<0||idx>=dayCount)return null;
+            return <button key={x.id} className="monthVacation" style={{
+              left:`${idx/dayCount*100}%`,width:`${100/dayCount}%`
+            }} onClick={()=>onSelect(x)} title="Szabadság">×</button>
+          })}
+
+          {visible.map(x=>{
+            const p=shiftPart(x);
+            if(!p)return null;
+            const overnight=p.overnight;
+            const overtime=x.kind==="overtime";
+            const lane=laneInfo.laneById[x.id]??0;
+            return <button key={x.id}
+              className={`monthShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""} ${overtime?"monthOvertimeShift":""}`}
+              style={{...p.style,top:10+lane*43}}
+              onClick={()=>onSelect(x)}
+              title={`${x.start}–${x.end}${x.note?` · ${x.note}`:""}`}>
+              <span>{x.start}–{x.end}{overnight&&!overtime&&<Moon className="nightIcon"/>}</span>
+            </button>
+          })}
+        </div>
+      </div>
+    }):<div className="tabloEmpty">Nincs a hónapra illeszkedő bejegyzés.</div>}
+  </div>
 }
 
 function StatsPage({shifts,user,dark,onBack,onToggleDark,onLogout}){
