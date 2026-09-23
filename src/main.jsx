@@ -208,8 +208,12 @@ function MonthlyRoster({data,selectedDate,onSelect}){
   const dayCount=days.length;
   const base=days[0];
   const users=[...new Map(data.map(x=>[x.user_id,x.username])).entries()];
-  const monthWidth=Math.max(dayCount*160,1600);
-  const dayWidth=`repeat(${dayCount},minmax(160px,1fr))`;
+  // A havi Tablóban a teljes hónap férjen el egyetlen idővonalban.
+  // A cellák szándékosan kompaktak; az éjszakai szolgálat a tényleges időtartamán
+  // végignyúlik a következő napra is.
+  const dayPixelWidth=86;
+  const monthWidth=dayCount*dayPixelWidth;
+  const dayWidth=`repeat(${dayCount},${dayPixelWidth}px)`;
   const dayMinutes=1440;
   const totalMinutes=dayCount*dayMinutes;
 
@@ -294,8 +298,8 @@ function MonthlyRoster({data,selectedDate,onSelect}){
             return <button key={x.id}
               className={`monthShift ${overnight?"overnight":""} ${x.type==="Egyéb"?"otherShift":""} ${overtime?"monthOvertimeShift":""}`}
               style={{
-                left:`${startIdx/dayCount*100}%`,
-                width:`${100/dayCount}%`,
+                left:`${shiftStart(x)/totalMinutes*100}%`,
+                width:`${Math.max((shiftEnd(x)-shiftStart(x))/totalMinutes*100, 2.2)}%`,
                 top:10+lane*43
               }}
               onClick={()=>onSelect(x)}

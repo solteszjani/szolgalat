@@ -546,12 +546,12 @@
 .tabloPage .monthRosterHead,
 .tabloPage .monthRosterRow{
   display:grid;
-  grid-template-columns:190px minmax(900px,1fr);
-  min-width:1090px;
+  grid-template-columns:190px minmax(1px,1fr);
+  min-width:0;
 }
 .tabloPage .monthHeaderDays{
   display:grid;
-  min-width:900px;
+  min-width:0;
 }
 .tabloPage .monthHeaderDays>div{
   min-width:0;
@@ -576,14 +576,14 @@
 }
 .tabloPage .monthRosterTimeline{
   position:relative;
-  min-width:900px;
-  overflow:hidden;
+  min-width:0;
+  overflow:visible;
 }
 .tabloPage .monthRosterGrid{
   position:absolute;
   inset:0;
   display:grid;
-  min-width:900px;
+  min-width:0;
   pointer-events:none;
 }
 .tabloPage .monthRosterGrid .monthCell{
@@ -594,15 +594,16 @@
   position:absolute;
   z-index:3;
   height:38px;
-  min-width:58px;
-  padding:0 9px;
+  min-width:0;
+  padding:0 4px;
   border:1px solid rgba(255,255,255,.12);
   border-radius:9px;
   background:#2563eb;
   color:#fff;
   cursor:pointer;
   box-shadow:0 4px 12px rgba(0,0,0,.18);
-  font-size:10px;
+  font-size:8px;
+  letter-spacing:-.15px;
   line-height:1;
   overflow:hidden;
   white-space:nowrap;
@@ -666,32 +667,40 @@
 @media(max-width:850px){
   .tabloPage .monthRosterHead,
   .tabloPage .monthRosterRow{
-    grid-template-columns:160px minmax(1000px,1fr);
-    min-width:1160px;
+    grid-template-columns:145px minmax(2852px,1fr);
+    min-width:2997px;
   }
   .tabloPage .monthRosterTimeline,
   .tabloPage .monthHeaderDays,
   .tabloPage .monthRosterGrid{
-    min-width:1000px;
+    min-width:2852px;
   }
   .tabloPage .monthShift{
-    min-width:52px;
-    height:36px;
-    padding:0 6px;
-    font-size:9px;
-  }
-  .tabloPage .monthShift span{
-    overflow:hidden;
-    text-overflow:ellipsis;
+    min-width:0;
+    height:34px;
+    padding:0 4px;
+    font-size:7.5px;
   }
   .tabloPage .monthHeadName{
     padding:10px 10px;
   }
 }
 
-/* Havi Tabló: a napok szándékosan szélesebbek, hogy a szolgálati idő teljesen olvasható legyen. */
+/* Havi Tabló: kompakt napok, teljes idővonal. A normál szolgálat nem lóg át; az éjszakás a tényleges időtartamán átnyúlhat a következő napra. */
 .tabloPage .monthShift span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  height:100%;
   overflow:visible;
   text-overflow:clip;
   white-space:nowrap;
+}
+.tabloPage .monthShift:not(.overnight){
+  overflow:hidden;
+}
+.tabloPage .monthShift.overnight{
+  overflow:visible;
 }
