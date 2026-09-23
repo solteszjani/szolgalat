@@ -4,7 +4,7 @@ export default async function handler(req,res){
   try{
     const db=await readyDb(); const admin=await requireAdmin(req,res,db); if(!admin)return;
     if(req.method!=="GET") return res.status(405).json({error:"Method not allowed"});
-    const users=await db.query(`SELECT u.id,u.username,u.email,u.created_at,
+    const users=await db.query(`SELECT u.id,u.username,u.email,u.shift_group,u.created_at,
       COUNT(s.id) FILTER (WHERE s.kind='service')::int AS service_count,
       COUNT(s.id) FILTER (WHERE s.kind='vacation')::int AS vacation_count,
       COUNT(s.id) FILTER (WHERE s.kind='overtime')::int AS overtime_count,

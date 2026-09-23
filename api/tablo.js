@@ -7,6 +7,7 @@ export default async function handler(req,res){
     const db=await readyDb();
     const r=await db.query(`
       SELECT s.id,s.user_id,COALESCE(u.username,u.email,'Ismeretlen') AS username,
+        COALESCE(u.shift_group,'Nincs megadva') AS shift_group,
         TO_CHAR(s.date,'YYYY-MM-DD') AS date,s.start_time AS start,s.end_time AS end,
         s.type,s.kind,s.parent_shift_id,s.call_sign,s.location,s.note
       FROM shifts s JOIN users u ON u.id=s.user_id

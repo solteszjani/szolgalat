@@ -21,6 +21,7 @@ export async function ensureDb(){
         );
         ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
         ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS shift_group TEXT DEFAULT 'Nincs megadva';
         WITH ranked AS (
           SELECT id, split_part(email,'@',1) AS base, ROW_NUMBER() OVER (PARTITION BY split_part(email,'@',1) ORDER BY id) AS rn
           FROM users WHERE (username IS NULL OR username='') AND email IS NOT NULL
